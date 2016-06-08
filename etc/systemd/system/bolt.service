@@ -1,0 +1,13 @@
+[Unit]
+Description=bolt
+
+[Service]
+User=[username]
+WorkingDirectory=/home/[username]/go/src/github.com/TeamFairmont/boltengine/
+ExecStart=/home/[username]/go/src/github.com/TeamFairmont/boltengine/api
+Restart=always
+RestartSec=30
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
