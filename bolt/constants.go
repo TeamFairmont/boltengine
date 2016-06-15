@@ -5,7 +5,7 @@
 package bolt
 
 // Version for bolt engine and components
-const Version = "1.0.1"
+const Version = "1.1.0"
 
 // EngineName is the 'friendly' marketing name of the product
 const EngineName = "Bolt Engine"
