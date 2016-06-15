@@ -1,6 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 package bolt
 
@@ -248,7 +248,7 @@ func (engine *Engine) processCommands(proc *commandprocess.CommandProcess, res <
 			}
 			proc.Mutex.Lock()
 			proc.NextCommand = ""
-			err = mqwrapper.PublishCommand(engine.mqConnection.Channel, proc.ID, nexttmp, proc.Payload, q.Name)
+			err = mqwrapper.PublishCommand(engine.mqConnection.Channel, proc.ID, engine.Config.Engine.Advanced.QueuePrefix, nexttmp, proc.Payload, q.Name)
 			proc.CommandTime = time.Now()
 			proc.Mutex.Unlock()
 		} else {
@@ -262,7 +262,7 @@ func (engine *Engine) processCommands(proc *commandprocess.CommandProcess, res <
 				proc.AddTraceEntry()
 			}
 			proc.Mutex.Lock()
-			err = mqwrapper.PublishCommand(engine.mqConnection.Channel, proc.ID, proc.CurrentCommand.Name, proc.Payload, q.Name)
+			err = mqwrapper.PublishCommand(engine.mqConnection.Channel, proc.ID, engine.Config.Engine.Advanced.QueuePrefix, proc.CurrentCommand.Name, proc.Payload, q.Name)
 			proc.CommandTime = time.Now()
 			proc.Mutex.Unlock()
 		}
@@ -405,7 +405,7 @@ func (engine *Engine) processCommands(proc *commandprocess.CommandProcess, res <
 				proc.AddTraceEntry()
 			}
 			proc.Mutex.Lock()
-			err = mqwrapper.PublishCommand(engine.mqConnection.Channel, proc.ID, proc.NextCommand, proc.Payload, q.Name)
+			err = mqwrapper.PublishCommand(engine.mqConnection.Channel, proc.ID, engine.Config.Engine.Advanced.QueuePrefix, proc.NextCommand, proc.Payload, q.Name)
 			proc.CommandTime = time.Now()
 			if err != nil {
 				engine.LogError("mq_error", logrus.Fields{"id": proc.ID, "command": proc.CurrentCommand.Name}, "Command failed to publish")
@@ -424,7 +424,7 @@ func (engine *Engine) processCommands(proc *commandprocess.CommandProcess, res <
 				proc.AddTraceEntry()
 			}
 			proc.Mutex.Lock()
-			err = mqwrapper.PublishCommand(engine.mqConnection.Channel, proc.ID, proc.CurrentCommand.Name, proc.Payload, q.Name)
+			err = mqwrapper.PublishCommand(engine.mqConnection.Channel, proc.ID, engine.Config.Engine.Advanced.QueuePrefix, proc.CurrentCommand.Name, proc.Payload, q.Name)
 			proc.CommandTime = time.Now()
 			if err != nil {
 				engine.LogError("mq_error", logrus.Fields{"id": proc.ID, "command": proc.CurrentCommand.Name}, "Command failed to publish")

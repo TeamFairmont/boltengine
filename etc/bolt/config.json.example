@@ -1,0 +1,222 @@
+{
+    "apiCalls": {
+        "v1/addProduct": {
+            "resultTimeoutMs": 2000,
+            "resultZombieMs": 10000,
+            "cache": {
+                "enabled": false
+            },
+            "requiredParams": {
+                "someGlobalOption1": "string",
+                "someGlobalOption2": "bool"
+            },
+            "commands": [{
+                "name": "product/checkDuplicates",
+                "resultTimeoutMs": 500,
+                "returnAfter": false,
+                "configParams": {
+                    "caseSensitive": false
+                }
+            }, {
+                "name": "product/saveToDb",
+                "resultTimeoutMs": 500,
+                "returnAfter": false,
+                "configParams": {
+                    "spellcheck": true
+                }
+            }, {
+                "name": "createNext",
+                "resultTimeoutMs": 500,
+                "returnAfter": true,
+                "configParams": {}
+            }, {
+                "name": "updateSearchIndex",
+                "resultTimeoutMs": 0,
+                "returnAfter": false,
+                "configParams": {
+                    "recordType": "product",
+                    "indexFields": ["sku", "name", "shortDescription"],
+                    "titleField": "name",
+                    "uniqueIdField": "sku"
+                }
+            }],
+            "longDescription":  "",
+            "shortDescription": "No long description"
+        },
+        "v1/getProduct": {
+            "resultTimeoutMs": 100,
+            "cache": {
+                "enabled": true,
+                "expirationTimeSec": 10
+            },
+            "requiredParams": {
+                "sku": "string"
+            },
+            "commands": [{
+                "name": "product/getFromDb",
+                "resultTimeoutMs": 500,
+                "returnAfter": false,
+                "configParams": {}
+            }, {
+                "name": "formatContent",
+                "resultTimeoutMs": 500,
+                "returnAfter": false,
+                "configParams": {
+                    "format": "html"
+                }
+            }],
+            "longDescription":  "Gets the desired product from the database",
+            "shortDescription": "Gets the desired product"
+        }
+    },
+
+    "cache": {
+        "type": "",
+        "host": "localhost:6379",
+        "pass": "",
+        "timeoutMs": 2000
+    },
+
+    "commandMeta": {
+        "product/checkDuplicates": {
+            "requiredParams": {
+                "sku": "string",
+                "name": "multilang-strings"
+            },
+            "stubData": {
+                "abc": 123,
+                "def": [4, 5, 6],
+                "ghi": {
+                    "val": 789
+                }
+            },
+            "longDescription":  "",
+            "shortDescription": ""
+        },
+        "product/saveToDb": {
+            "requiredParams": {
+                "sku": "string",
+                "price": "double",
+                "salePrice": "double",
+                "name": "multilang-strings",
+                "shortDescription": "multilang-strings"
+            },
+            "stubData": {
+                "abc": 321,
+                "def": [6, 5, 4]
+            },
+            "stubReturn": {
+                "product_id": 1001
+            },
+            "stubDelayMs": 20,
+            "longDescription":  "Saves the product to the database",
+            "shortDescription": "Saves the product"
+        },
+        "product/getFromDb": {
+            "requiredParams": {
+                "sku": "string"
+            },
+            "stubReturn": {
+                "sku": "ABC123",
+                "name": "MEDIUM T-SHIRT",
+                "description": "This is a great shirt.\nFull of color."
+            },
+            "longDescription":  "Gets the desired product from the database",
+            "shortDescription": "Gets the desired product"
+        },
+        "formatContent": {
+            "requiredParams": {},
+            "stubReturn": {
+                "name": "Medium T-Shirt",
+                "description": "This is a great shirt.<br>Full of color."
+            },
+            "longDescription":  "Formats the content to look how we want",
+            "shortDescription": "Formats the content"
+        },
+        "updateSearchIndex": {
+            "requiredParams": {
+                "indexFields": "array",
+                "uniqueIdField": "string"
+            },
+            "longDescription":  "Updates the search index for searching",
+            "shortDescription": "Updates the search index"
+        }
+    },
+
+    "engine": {
+        "version": "Example API v1",
+        "bind": ":8888",
+        "tlsCertFile": "cert.pem",
+        "tlsKeyFile": "key.pem",
+        "tlsEnabled": false,
+        "authMode": "hmac",
+        "prettyOutput": true,
+        "extraConfigFolder": "etc/bolt/",
+        "docsEnabled": true,
+        "advanced": {
+            "stubMode": true,
+            "stubDelayMs": 5,
+            "completeResultExpiration": "120s",
+            "completeResultLoopFreq": "5s",
+            "debugFormEnabled": true
+        }
+    },
+
+    "logging": {
+        "level": "info"
+    },
+
+    "security": {
+        "verifyTimeout": 30,
+        "groups": [{
+            "name": "username1_goes_here",
+            "hmackey": "hmackey1_goes_here"
+        }, {
+            "name": "username2_goes_here",
+            "hmackey": "hmackey2_goes_here"
+        }, {
+            "name": "engineadmin",
+            "hmackey": "engineadmin_hmackey_goes_here",
+            "requestsPerSecond": 3
+        }],
+        "handlerAccess": [{
+          "handler": "/debug-log",
+          "allowGroups": ["engineadmin"]
+        }, {
+          "handler": "/echo/",
+          "allowGroups": ["engineadmin"]
+        }, {
+          "handler": "/get-config",
+          "allowGroups": ["engineadmin"]
+        }, {
+          "handler": "/pending",
+          "allowGroups":  ["engineadmin","username1_goes_here"]
+        }, {
+          "handler": "/save-config",
+          "allowGroups": ["engineadmin"]
+        }, {
+          "handler": "/stats",
+          "allowGroups": ["engineadmin"]
+        }, {
+          "handler": "/v1/addProduct",
+          "denyGroups": ["username2_goes_here"]
+        }],
+        "corsDomains":[],
+        "corsAutoAddLocal": true
+    },
+
+    "workerConfig": {
+        "primaryDb": {
+            "host": "localhost",
+            "port": 5359,
+            "user": "write",
+            "pass": "12345"
+        },
+        "readonlyDb": {
+            "host": "readhost",
+            "port": 5359,
+            "user": "read",
+            "pass": "12345"
+        }
+    }
+}

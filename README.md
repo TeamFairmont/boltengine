@@ -1,4 +1,4 @@
-# boltengine  
+# Bolt Engine  
 The open source Bolt Engine is a scalable API builder that uses an AMQP-compatible server to distribute and coordinate tasks to workers in any programming language. It provides a common authentication mechanism and input / output format that allows many disparate systems to be seamlessly integrated and exposed to API consumer applications. By providing performance contracts, worker stubs, failure models, and built-in documentation, the Bolt Engine enables application developers to rapidly create both frontend and backend in parallel with the knowledge that their application will scale well and utilize the same access patterns no matter what systems the backend utilizes. Documentation can be found here: https://docs.google.com/document/d/1lLQj5bPhtF5qB0U5MI9Wh72BNCVWznxiYe-WrRNZ_pc/edit?usp=sharing
 
 ## Screenshots

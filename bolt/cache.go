@@ -95,7 +95,7 @@ func (engine *Engine) CacheCallResult(cp *commandprocess.CommandProcess) error {
 		if cp.APICall.Cache.Enabled {
 			inputstr := cp.InitialInputString //issue #40, change to use a snapshot/copy of initial input in case workers accidentally change it
 			retval := cp.Payload.Path("return_value").String()
-			err := engine.SetCacheItem(cp.InitialCommand, inputstr, retval, cp.APICall.Cache.ExpirationTime)
+			err := engine.SetCacheItem(engine.Config.Engine.Advanced.QueuePrefix+cp.InitialCommand, inputstr, retval, cp.APICall.Cache.ExpirationTime)
 			if err == nil {
 				engine.LogInfo("cache_set", logrus.Fields{"id": cp.ID, "command": cp.InitialCommand, "input": inputstr}, "Cache set")
 			} else {

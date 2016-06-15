@@ -23,8 +23,8 @@ _testmain.go
 *.exe
 *.test
 *.prof
-boltengine
 api
+boltengine
 .vscode
 *.swp
 debug

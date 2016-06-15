@@ -4,9 +4,9 @@ Description=bolt
 [Service]
 User=[username]
 WorkingDirectory=/home/[username]/go/src/github.com/TeamFairmont/boltengine/
-ExecStart=/home/[username]/go/src/github.com/TeamFairmont/boltengine/api
+ExecStart=/home/[username]/go/src/github.com/TeamFairmont/boltengine/boltengine
 Restart=always
-RestartSec=30
+RestartSec=3
 Type=simple
 
 [Install]

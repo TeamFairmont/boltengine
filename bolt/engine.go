@@ -1,6 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 package bolt
 
@@ -11,7 +11,11 @@ import (
 	"html/template"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
+
+	"gopkg.in/go-redis/cache.v1"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/TeamFairmont/amqp"
@@ -25,7 +29,6 @@ import (
 	"github.com/TeamFairmont/boltshared/mqwrapper"
 	"github.com/TeamFairmont/boltshared/stats"
 	"github.com/TeamFairmont/boltshared/utils"
-	"gopkg.in/go-redis/cache.v1"
 )
 
 var (
@@ -176,6 +179,7 @@ func (engine *Engine) ListenAndServe() error {
 				"err": err,
 			}, "Couldn't connect to mqUrl")
 		} else {
+			// recoverMqConnection also sets up the worker error queue goroutine
 			go engine.recoverMqConnection()
 		}
 		defer engine.mqConnection.Close()
@@ -193,13 +197,24 @@ func (engine *Engine) ListenAndServe() error {
 			go engine.workerStub()
 		}
 
+		// Intercept signal notifications for clean shutdown
+		signalChan := make(chan os.Signal, 1)
+		signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			for sig := range signalChan {
+				engine.LogInfo("os_interrupt", logrus.Fields{"signal": sig}, "OS Signal Received")
+				engine.Shutdown()
+			}
+		}()
+
 		//finally start
 		engine.Stats.Ch("general").Ch("engine_start").V(time.Now())
 		engine.LogInfo("start", logrus.Fields{
-			"version":  Version,
-			"bind":     utils.GetLocalIP() + engine.Config.Engine.Bind,
-			"authMode": engine.Config.Engine.AuthMode,
-		}, "Bolt Engine Started")
+			"version":     Version,
+			"bind":        utils.GetLocalIP() + engine.Config.Engine.Bind,
+			"authMode":    engine.Config.Engine.AuthMode,
+			"queuePrefix": engine.Config.Engine.Advanced.QueuePrefix,
+		}, EngineName+" Started")
 
 		if engine.Config.Engine.TLSEnabled {
 			// Start the TLSed engine services
@@ -217,6 +232,7 @@ func (engine *Engine) ListenAndServe() error {
 				"engine.Server.ListenAndServe()": engine.Server.ListenAndServe(),
 			}, "ListenAndServe()")
 		}
+
 		return nil
 	}
 	return errors.New("No config loaded")
@@ -293,9 +309,39 @@ func (engine *Engine) IsShutdown() bool {
 	return engine.shutdown
 }
 
+// workerErrorQueue logs any messages received via the Prefix+ErrorQueue
+func (engine *Engine) workerErrorQueue(reconnectsig chan bool) {
+	//engine.Config.Engine.Advanced.QueuePrefix+engine.Config.Engine.Advanced.ErrorQueue
+	_, res, err := mqwrapper.CreateConsumeNamedQueue(engine.Config.Engine.Advanced.QueuePrefix+config.ErrorQueueName, engine.mqConnection.Channel)
+	if err != nil {
+		engine.LogWarn("worker_log", logrus.Fields{"error": err}, "Could not connect to worker error queue")
+	} else {
+
+		for {
+			select {
+			case <-reconnectsig:
+				_, res, err = mqwrapper.CreateConsumeNamedQueue(engine.Config.Engine.Advanced.QueuePrefix+config.ErrorQueueName, engine.mqConnection.Channel)
+				if err != nil {
+					engine.LogWarn("worker_log", logrus.Fields{"error": err}, "Could not connect to worker error queue")
+				}
+
+			case d := <-res:
+				if d.RoutingKey != "" {
+					engine.LogWarn("worker_log", logrus.Fields{"data": string(d.Body)}, "")
+				}
+				d.Ack(false)
+			}
+
+		}
+	}
+}
+
 // recoverMqConnection registers and monitors the mq disconnect event and tries to
 // re-establish connection on a disconnect or error
 func (engine *Engine) recoverMqConnection() {
+	reconnectsig := make(chan bool)
+	go engine.workerErrorQueue(reconnectsig)
+
 	disc := engine.mqConnection.Connection.NotifyClose(make(chan *amqp.Error))
 	d, _ := time.ParseDuration("1s")
 	go func() {
@@ -312,6 +358,7 @@ func (engine *Engine) recoverMqConnection() {
 						time.Sleep(d)
 					} else {
 						engine.LogInfo("mq_connect", logrus.Fields{}, "Successfully reconnected to mqUrl")
+						reconnectsig <- true
 						defer engine.mqConnection.Close()
 						disc = engine.mqConnection.Connection.NotifyClose(make(chan *amqp.Error))
 						break DisconnectEvent

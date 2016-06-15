@@ -45,7 +45,7 @@ func (engine *Engine) workerStub() {
 	//TODO error if required params missing from stubs
 	//spin up queues and goroutines for each command
 	for k, cmd := range allcommands {
-		q, res, err := mqwrapper.CreateConsumeNamedQueue(k, mq.Channel)
+		q, res, err := mqwrapper.CreateConsumeNamedQueue(engine.Config.Engine.Advanced.QueuePrefix+k, mq.Channel)
 		if err != nil {
 			engine.LogWarn("worker_stub", logrus.Fields{"command": k, "err": err}, "Worker stub failed to register queue")
 		} else {
@@ -115,7 +115,7 @@ func (engine *Engine) workerStub() {
 					}
 
 					//send reply back
-					err = mqwrapper.PublishCommand(mq.Channel, d.CorrelationId, d.ReplyTo, payload, "")
+					err = mqwrapper.PublishCommand(mq.Channel, d.CorrelationId, "", d.ReplyTo, payload, "")
 					if err != nil {
 						engine.LogError("worker_stub", logrus.Fields{"command": command, "err": err}, "Worker stub failed to publish command result")
 					}
