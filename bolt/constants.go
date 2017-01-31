@@ -5,7 +5,7 @@
 package bolt
 
 // Version for bolt engine and components
-const Version = "1.1.0"
+const Version = "1.1.1"
 
 // EngineName is the 'friendly' marketing name of the product
 const EngineName = "Bolt Engine"
@@ -15,3 +15,4 @@ const ConfigPath = "/etc/bolt/config.json"
 
 // HaltCallCommandName is the string pased to payload.nextCommand to stop all further processing of an api call
 const HaltCallCommandName = "HALT_CALL"
+

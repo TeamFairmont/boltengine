@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.1.1
+* Bugfix in allow/deny list checking to ignore the following prefixes in URL paths: /request/, /task/, /work/, or /form/.
+* Bugfix in extraConfigFolder.  Read path with or without trailing slash.
+
 ### 1.1.0
 * Hook into SIGTERM and perform engine shutdown
 * Added engine.advanced.queuePrefix config option to allow multiple engines sharing a MQ and/or redis server without naming conflicts
