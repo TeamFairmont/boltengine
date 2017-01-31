@@ -1,6 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 package bolt
 
@@ -266,7 +266,7 @@ func handlerAllowed(groupname, url, apiCall string, handlerAccess []config.Handl
 
 		// Check to see if the requested url contains a restricted handler name
 		if (handlerAccess[handlerIndex].APICall != "" && handlerAccess[handlerIndex].APICall == apiCall) ||
-			(handlerAccess[handlerIndex].HandlerURL != "" && strings.HasPrefix(url, handlerAccess[handlerIndex].HandlerURL)) {
+			(handlerAccess[handlerIndex].HandlerURL != "" && strings.HasSuffix(url, handlerAccess[handlerIndex].HandlerURL)) {
 
 			//// Check to see if this group is denied
 			if len(handlerAccess[handlerIndex].DenyGroups) > 0 && groupname == "" {

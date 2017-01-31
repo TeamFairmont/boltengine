@@ -27,7 +27,7 @@ func TestCreateTestEngine(t *testing.T) {
 	go testengine2.ListenAndServe()
 }
 
-//test ExtractCommandName
+//test ExtractCallName
 func TestExtractCallName(t *testing.T) {
 	//flags that should be removed
 	flags := []string{
@@ -58,14 +58,14 @@ func runExtractCMD(flags []string, domain, path string, noErr bool, t *testing.T
 		//creats a new request with the above url
 		r, _ := http.NewRequest("POST", url, nil)
 
-		//assigns the output of ExtractCommandName to s and err
+		//assigns the output of ExtractCallName to s and err
 		s, err := ExtractCallName(r)
 
 		if noErr {
 			//check if s matches the desired output
-			assert.Equal(t, url[len(domain)+len(flag):], s, "ExtractCommandName results should match ")
+			assert.Equal(t, url[len(domain)+len(flag):], s, "ExtractCallName results should match ")
 		} else {
-			//if an eeror was returned by ExtractCommandName PASS
+			//if an eeror was returned by ExtractCallName PASS
 			assert.NotNil(t, err, "Err should be not nill.")
 		}
 	}

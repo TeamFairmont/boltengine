@@ -64,7 +64,7 @@
         "tlsEnabled": false,
         "authMode": "hmac",
         "prettyOutput": true,
-        "extraConfigFolder": "etc/bolt/",
+        "extraConfigFolder": "/etc/bolt/",
         "docsEnabled": true,
         "advanced": {
             "stubMode": true,

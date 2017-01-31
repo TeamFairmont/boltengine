@@ -416,7 +416,7 @@ func (engine *Engine) OutputError(w http.ResponseWriter, err *bolterror.BoltErro
 // 'static' functions begin
 //*************************
 
-//For use in ExtractCommandName
+//For use in ExtractCallName
 var flags = []string{"/request/",
 	"/task/",
 	"/work/",

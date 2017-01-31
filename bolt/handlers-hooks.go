@@ -6,10 +6,22 @@ package bolt
 
 import (
 	"net/http"
+	"os"
+
+	"github.com/Sirupsen/logrus"
 )
 
 // serveSingle allows individual files to be served.  Useful for css, js, or html
 func serveSingle(engine *Engine, pattern string, filename string) {
+	// Check that the static file exists
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		dir, direrr := os.Getwd()
+		if direrr != nil {
+			engine.LogInfo("init", logrus.Fields{"err": direrr}, "Error obtaining working dir")
+		}
+		engine.LogInfo("init", logrus.Fields{"err": err, "work_dir": dir}, "Missing static file")
+	}
+	// Create the single file handler
 	engine.Mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filename)
 	})

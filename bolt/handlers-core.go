@@ -252,12 +252,6 @@ func coreHandleDocs(ctx *Context, w http.ResponseWriter, r *http.Request, group 
 			buffer.WriteString(runToggleDescription(callKey, call.Path("shortDescription").Data().(string), call.Path("longDescription").Data().(string)))
 			buffer.WriteString("<div class='row commandinfo'><div class='large-12 columns'>")
 			buffer.WriteString(addRow(call, "Required Params", "requiredParams"))
-			/*
-				// Stub values may not be necessary.  stubData & stubReturn are double base64 encoded json.RawMessage.
-				buffer.WriteString(addRow(call, "Stub Data", "stubData"))
-				buffer.WriteString(addRow(call, "Stub Return", "stubReturn"))
-				buffer.WriteString(addRow(call, "Stub Delay (ms)", "stubDelayMs"))
-			*/
 			buffer.WriteString("</div></div>")
 		}
 		buffer.WriteString("</div></div></body>")

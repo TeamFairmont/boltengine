@@ -76,7 +76,7 @@ func (engine *Engine) HandleCall(reqtype int, w http.ResponseWriter, r *http.Req
 		req.SetInitialInput(payload)
 
 		req.Payload.SetP(req.ID, "id")
-		engine.LogInfo("call_in", logrus.Fields{"id": req.ID, "url": r.URL.String(), "payload": payload}, "Api call in")
+		engine.LogInfo("call_in", logrus.Fields{"id": req.ID, "url": r.URL.String(), "cmd": cmd, "payload": payload}, "Api call in")
 		engine.Stats.Ch("performance").Ch("calls").Ch(req.InitialCommand).Ch("hits").Incr()
 
 		noCache := true
