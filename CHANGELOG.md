@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.1.2
+* Updated binaries to use latest boltshared with extraConfigFolder fix.
+* Feature for amqp with TLS added in boltshared.  Including binaries with this update.
+
 ### 1.1.1
 * Bugfix in allow/deny list checking to ignore the following prefixes in URL paths: /request/, /task/, /work/, or /form/.
 * Bugfix in extraConfigFolder.  Read path with or without trailing slash.
