@@ -17,6 +17,7 @@ import (
 var ctx *Context
 
 func TestCoreHandleTest(t *testing.T) {
+	//api.EngineReboot()
 	//cfgdir := "../etc/bolt/"
 	//cfgpath := "../etc/bolt/config.json"
 	ctx = &Context{}

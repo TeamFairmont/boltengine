@@ -1,6 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 package bolt
 
@@ -15,8 +15,37 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/TeamFairmont/boltengine/bolterror"
+	"github.com/TeamFairmont/boltshared/mqwrapper"
+	"github.com/TeamFairmont/boltshared/utils"
 	"github.com/TeamFairmont/gabs"
 )
+
+var (
+	startRebootChan = make(chan bool)
+)
+
+// StartEngineReboot starts the reboot proccess called from api.CheckConfig or coreHandleReboot
+func StartEngineReboot() {
+	startRebootChan <- true
+}
+
+// EngineReboot starts the reboot process started in api.go,
+func EngineReboot(ch, rebootChan chan bool) {
+	for true {
+		<-startRebootChan        // wait for signal from startRebootChan called from coreHandleReboot or CheckConfig in api.go
+		utils.CloseDoneChan()    // Closes doneChan, that will close several go routines, engine.go: 406 in workerErrorQueue, engine.go: 480 in expireResults(), requestmanager: 68 in NewRequestManager()
+		ch <- true               // send to ch in api.go startEngine() to close the stoppable listenerD
+		mqwrapper.CloseRes()     // closes out of a goroutine in engine.go workerErrorQueue(), by closing res, by closing the connection in mqwrapper.go CreateConsumeNamedQueue
+		<-utils.GetResDoneChan() // wait for the tcp port to finish closing
+		rebootChan <- true       // send to rebootChan in api.go to restart main loop
+	}
+}
+
+// coreHandleReboot sends a signal to start reboot
+func coreHandleReboot(ctx *Context, w http.ResponseWriter, r *http.Request, group string) error {
+	StartEngineReboot()
+	return nil
+}
 
 func coreHandleTest(ctx *Context, w http.ResponseWriter, r *http.Request, group string) error {
 	fmt.Fprintf(w, "{\"test\": %d}", 1)
@@ -260,6 +289,8 @@ func coreHandleDocs(ctx *Context, w http.ResponseWriter, r *http.Request, group 
 	fmt.Fprint(w, buffer.String())
 	return nil
 }
+
+// TODO make a coreHandleRestart
 
 func coreHandlePending(ctx *Context, w http.ResponseWriter, r *http.Request, group string) error {
 	reqs, err := ctx.Engine.Requests.StatusJSON()

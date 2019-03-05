@@ -99,7 +99,7 @@ func (cp *CommandProcess) StartTimeout() chan bool {
 	cp.TimeoutStarted = true
 	timeout := make(chan bool, 1)
 	if cp.APICall.ResultTimeout > 0 {
-		go func() {
+		go func() { //seems reboot safe
 			time.Sleep(cp.APICall.ResultTimeout)
 			timeout <- true
 		}()

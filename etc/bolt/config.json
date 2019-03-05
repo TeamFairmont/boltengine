@@ -1,96 +1,597 @@
 {
     "apiCalls": {
-        "v1/exampleCall": {
-            "resultTimeoutMs": 2000,
-            "resultZombieMs": 10000,
-            "cache": {
-                "enabled": true
-            },
-            "requiredParams": {
-                "someOptionName1": "string",
-                "someOptionName2": "bool"
-            },
+    "mobile/getThemeNormal":{
+        "resultTimeoutMs": 500,
+        "resultZombieMs": 5000,
+            "requiredParams": {},
             "commands": [{
-                "name": "example/commandName1",
-                "resultTimeoutMs": 500,
-                "returnAfter": false,
+                "name": "get/themeNormal",
+                "resultTimeoutMs": 5000,
                 "configParams": {
-                    "optionForExampleCommandName1": true
-                }
-            }, {
-                "name": "example/commandName2",
-                "resultTimeoutMs": 1000,
-                "returnAfter": false,
-                "configParams": {
-                    "optionForExampleCommandName2": 123
+                    "mode": "simple"
                 }
             }],
-            "longDescription":  "This is an example api call exposed through bolt engine, with two commands that need workers",
-            "shortDescription": "This is an example api call"
+            "filterkeys": ["return_value", "complete", "id", "error"],
+            "shortDescription": "get cart options"
+    },
+    "obile/getThemeHalloween":{
+        "resultTimeoutMs": 500,
+        "resultZombieMs": 5000,
+            "requiredParams": {},
+            "commands": [{
+                "name": "get/themeHalloween",
+                "resultTimeoutMs": 5000,
+                "configParams": {
+                    "mode": "simple"
+                }
+            }],
+            "filterkeys": ["return_value", "complete", "id", "error"],
+            "shortDescription": "get cart options"
+    },
+    "mobile/getThemeHightContrast":{
+        "resultTimeoutMs": 500,
+        "resultZombieMs": 5000,
+            "requiredParams": {},
+            "commands": [{
+                "name": "get/themeHightContrast",
+                "resultTimeoutMs": 5000,
+                "configParams": {
+                    "mode": "simple"
+                }
+            }],
+            "filterkeys": ["return_value", "complete", "id", "error"],
+            "shortDescription": "get cart options"
+    },
+    "mobile/getThemeChristmas":{
+        "resultTimeoutMs": 500,
+        "resultZombieMs": 5000,
+            "requiredParams": {},
+            "commands": [{
+                "name": "get/themeChristmas",
+                "resultTimeoutMs": 5000,
+                "configParams": {
+                    "mode": "simple"
+                }
+            }],
+            "filterkeys": ["return_value", "complete", "id", "error"],
+            "shortDescription": "get cart options"
+    },
+	"mobile/getCartOptions":{
+	    "resultTimeoutMs": 500,
+	    "resultZombieMs": 5000,
+            "requiredParams": {},
+            "commands": [{
+                "name": "get/options",
+                "resultTimeoutMs": 5000,
+                "configParams": {
+                    "mode": "simple"
+                }
+            }],
+            "filterkeys": ["return_value", "complete", "id", "error"],
+            "shortDescription": "get cart options"
+        },
+	"mobile/remove":{
+	    "resultTimeoutMs": 500,
+	    "resultZombieMs": 5000,
+	    "requiredParams": {},
+	    "commands": [{
+		"name": "remove",
+		"resultTimeoutMs": 5000,
+		"configParams": {
+		    "mode": "simple"
+		}
+	    }],
+	    "filterkeys": ["return_value", "complete", "id", "error"],
+            "shortDescription": "remove cart item"
+        },
+	"mobile/submitCart":{
+	    "resultTimeoutMs": 500,
+            "resultZombieMs": 5000,
+            "requiredParams": {},
+            "commands": [{
+                "name": "submit",
+		"resultTimeoutMs": 5000,
+                "configParams": {
+                    "mode": "simple"
+                }
+            }],
+	    "filterkeys": ["return_value", "complete", "id", "error"],
+            "shortDescription": "submits cart"
+        },
+	"mobile/clearCart":{
+            "resultTimeoutMs": 500,
+            "resultZombieMs": 5000,
+            "requiredParams": {},
+            "commands": [{
+                "name": "clear",
+                "resultTimeoutMs": 5000,
+                "configParams": {
+                    "mode": "simple"
+                }
+            }],
+            "filterkeys": ["return_value", "complete", "id", "error"],
+            "shortDescription": "clears cart"
+        },
+	"mobile/cancelCart":{
+            "resultTimeoutMs": 500,
+            "resultZombieMs": 5000,
+            "requiredParams": {},
+            "commands": [{
+                "name": "cancel",
+                "resultTimeoutMs": 5000,
+                "configParams": {
+                    "mode": "simple"
+                }
+            }],
+            "filterkeys": ["return_value", "complete", "id", "error"],
+            "shortDescription": "cancels the cart"
+        },
+	"mobile/login": {
+	    "resultTimeoutMs": 500,
+	    "resultZombieMs": 5000,
+	    "requiredParams": {},
+	    "commands": [{
+		"name": "login",
+		"resultTimeoutMs": 5000,
+		"configParams": {
+		    "mode": "simple"
+		}
+	    }],
+	    "filterkeys": ["return_value", "complete", "id", "error"],
+	    "shortDescription": "Login"
+	},
+        "mobile/getPromo": {
+            "resultTimeoutMs": 588,
+            "resultZombieMs": 5000,
+            "requiredParams": {},
+            "commands": [{
+                "name": "get/promo",
+                "reslultTimeoutMs": 5000,
+                "configParams":{
+                    "mode": "simple"
+                }
+            }],
+            "filterkeys": ["return_value", "complete", "id", "error"],
+            "shortDescription": "You're a cat!"
+        },
+        "mobile/getMessage": {
+            "resultTimeoutMs": 500,
+            "resultZombieMs": 5000,
+            "requiredParams": {},
+            "commands": [{
+                "name": "get/message",
+                "resultTimeoutMs": 5000,
+                "configParams": {
+                    "mode": "simple"
+                }
+            }],
+            "filterKeys": ["return_value","complete","id","error"],
+            "shortDescription": "You win!"
+        },
+		
+        "mobile/adjustCart": {
+            "resultTimeoutMs": 500,
+            "resultZombieMs": 5000,
+            "requiredParams": {},
+            "commands": [{
+                "name": "cart/adjust",
+                "resultTimeoutMs": 500,
+                "configParams": {
+                    "mode": "simple"
+                }
+            },{
+                "name": "cart/validate",
+                "resultTimeoutMs": 200,
+                "configParams": {
+                    "allowOversell": true
+                }
+            }, {
+                "name": "cart/wishList",
+                "resultTimeoutMs": 200,
+                "configParams": {}
+            }],
+            "filterKeys": ["return_value","complete","id","error"],
+            "shortDescription": "This call updates the quantity of a sku in cart (or adds or removes it), and returns the complete cart"
+        },
+        "mobile/getHomeBanners": {
+            "resultTimeoutMs": 300,
+            "resultZombieMs": 5000,
+            "requiredParams": {},
+            "commands": [{
+                "name": "home/banners",
+                "resultTimeoutMs": 300,
+                "configParams": {
+                    "platform": "mobile"
+                }
+            }],
+            "filterKeys": ["return_value","complete","id","error"],
+            "shortDescription": "This call gets the homepage banner image array of URLs"
+        },
+        "mobile/getRecommendedProducts": {
+            "resultTimeoutMs": 500,
+            "resultZombieMs": 5000,
+            "requiredParams": { "userId": "string" },
+            "commands": [{
+                "name": "products/recommended",
+                "resultTimeoutMs": 500,
+                "configParams": {
+                    "max": 4
+                }
+            },{
+                "name": "products/get-recommended-promo-prices",
+                "resultTimeoutMs": 500,
+                "configParams": {}
+            }],
+            "filterKeys": ["return_value","complete","id","error"],
+            "shortDescription": "This call gets recommended product listings for a user with special pricing"
+        },
+        "mobile/getCategoryProducts": {
+            "resultTimeoutMs": 500,
+            "resultZombieMs": 5000,
+            "requiredParams": { "categoryId": "int64"},
+            "commands": [{
+                "name": "products/category",
+                "resultTimeoutMs": 500,
+                "configParams": {
+                    "max": 50
+                }
+            }],
+            "filterKeys": ["return_value","complete","id","error"],
+            "shortDescription": "This call gets product listings for a category"
+        },
+        "mobile/getProductDetail": {
+            "resultTimeoutMs": 500,
+            "resultZombieMs": 5000,
+            "requiredParams": { "sku": "string"},
+            "commands": [{
+                "name": "products/detail",
+                "resultTimeoutMs": 500,
+                "configParams": {}
+            }],
+            "filterKeys": ["return_value","complete","id","error"],
+            "shortDescription": "This call gets a product's complete detail"
+        },
+        "mobile/getCategories": {
+            "resultTimeoutMs": 500,
+            "resultZombieMs": 5000,
+            "requiredParams": {},
+            "commands": [{
+                "name": "categories/get",
+                "resultTimeoutMs": 500,
+                "configParams": {"amount":"all"}
+            }],
+            "filterKeys": ["return_value","complete","id","error"],
+            "shortDescription": "This call gets all categories for showing in mobile"
         }
     },
 
-    "cache": {
-        "type": "",
-        "host": "localhost:6379",
-        "pass": "",
-        "timeoutMs": 2000
-    },
-
     "commandMeta": {
-        "example/commandName1": {
-            "requiredParams": {
-                "someOptionName1": "string",
-                "someOptionName2": "bool"
+    "get/themeNormal": {
+        "requiredParams": {},
+            "shortDescription": "login",
+            "stubReturn": {
+                "message": "Recived style from bolt",
+                "colors":{ 
+                    "color1":" w3-light-gray",
+                    "color2":" w3-gray",
+                    "color3":" w3-blue-gray",
+                    "colorBtn":" w3-khaki"
+                },
+                "ThemeList":[
+                    {"listID":"theme","listTitle":"Normal"},
+                    {"listID":"theme","listTitle":"Halloween"},
+                    {"listID":"theme","listTitle":"Christmas"},
+                    {"listID":"theme","listTitle":"HightContrast"}
+                ]
             },
-            "longDescription":  "This worker does the first step of a process",
-            "shortDescription": "This worker is the first step"
+            "stubDelayMs": 29
+    },
+    "get/themeHalloween": {
+        "noStub":true,
+        "requiredParams": {},
+            "shortDescription": "login",
+            "stubReturn": {
+                "message": "Recived style from bolt",
+                "colors":{ 
+                    "color1":" w3-black",
+                    "color2":" w3-green",
+                    "color3":" w3-orange",
+                    "colorBtn":" w3-orange"
+                }
+            },
+            "stubDelayMs": 29
+    },
+    "get/themeChristmas": {
+        "requiredParams": {},
+            "shortDescription": "login",
+            "stubReturn": {
+                "message": "Recived style from bolt",
+                "colors":{ 
+                    "color1":" w3-green",
+                    "color2":" w3-red",
+                    "color3":" w3-red",
+                    "colorBtn":" w3-yellow"
+                }
+            },
+            "stubDelayMs": 29
+    },
+    "get/themeHightContrast": {
+        "requiredParams": {},
+            "shortDescription": "login",
+            "stubReturn": {
+                "message": "Recived style from bolt",
+                "colors":{ 
+                    "color1":" w3-black",
+                    "color2":" w3-dark-gray",
+                    "color3":" w3-black",
+                    "colorBtn":" w3-yellow"
+                }
+            },
+            "stubDelayMs": 29
+    },
+	"get/options": {
+	    "requiredParams": {},
+            "shortDescription": "get a cart id",
+            "stubReturn": {
+                "cartID":123454321
+            },
+            "stubDelayMs": 29
         },
-	    "example/commandName2": {
-            "requiredParams": {
-                "someOptionName1": "string",
-                "someOptionName2": "bool"
+	"login": {
+	    "requiredParams": {},
+	    "shortDescription": "login",
+	    "stubReturn": {
+		"user": "derek",
+		"pass": "derek"
+	    },
+	    "stubDelayMs": 29
+	},
+        "get/promo": {
+            "requiredParams": {},
+            "shortDescription": "Cats love coupons",
+            "stubReturn": {
+                "discount": 10
             },
-            "longDescription":  "This worker does the first step of a process",
-            "shortDescription": "This worker is the first step"
+            "stubDelayMs": 20
+        },
+	    "get/message": {
+            "requiredParams": {},
+            "shortDescription": "This worker sends a message.",
+            "stubReturn": {
+                "message": "Meow! ~^,,^~"
+            },
+            "stubDelayMs": 20
+        }, 
+	    "cart/adjust": {
+            "requiredParams": {},
+            "shortDescription": "This worker adjusts or creates the cart id session with the sku and quantity provided. Takes an array of products.",
+            "stubReturn": {
+                "cartItems":[],
+		        "message": "cart adjusted" 
+                
+            },
+            "stubDelayMs": 20
+        },
+        "cart/wishList": {
+            "requiredParams": {},
+            "shortDescription": "This worker returns items in the wish list",
+            "stubReturn": {
+                "wishItems":[
+                    {"name":"Fire Cake","description":"This cake is imbued with a weak fire element", "price":14, "sku":"fcake", "date": "2016-04-29 14:40:00", "stock": 1, "qty":1, "meta": {"giftmessage":"Happy birthday!" }, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Chocolate Power Cake","description":"This product will make you gain kitty fuzzy paws", "price":57, "sku":"cpcake", "date": "2016-04-29 13:40:00", "stock": 1, "qty":47, "meta": {}, "previewImage":"https://placekitten.com/118/97"},
+		            {"name":"Black & White Cake","description":"This product will teach you to punce like a cat", "price":45, "sku":"bwcake", "date": "2016-04-29 15:40:00", "stock": 1, "qty":1, "meta": {"giftmessage":"Happy birthday!" }, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Wubba Wubba Cake","description":"This cake is a lie", "price":45, "sku":"wwcake", "date": "2016-03-29 14:40:00", "stock": 1, "qty":12, "meta": {"giftmessage":"Happy birthday!" }, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Chinese Chocolate Cake","description":"This cake is also a lie", "price":56, "sku":"cccake", "date": "2016-05-29 14:40:00", "stock": 1, "qty":24, "meta": {}, "previewImage":"https://placekitten.com/118/97"},
+		            {"name":"Mega Cake","description":"This cake is the truth", "price":35, "sku":"wcake", "date": "2016-06-29 14:40:00", "stock": 1, "qty":1, "meta": {"giftmessage":"Happy birthday!" }, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Oblate Mix","description":"Thiscake isn't even cake", "price":28, "sku":"ccake", "date": "2016-08-29 14:40:00", "stock": 1, "qty":4, "meta": {}, "previewImage":"https://placekitten.com/118/97"},
+		            {"name":"Fira Cake","description":"This cake is imbued with a moderate fire element", "price":78, "sku":"fcake2", "date": "2016-04-28 14:40:00", "stock": 1, "qty":1, "meta": {"giftmessage":"Happy birthday!" }, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Firaga Cake","description":"This cake is the ultimate form of fire imbued cake", "price":123, "sku":"fcake3", "date": "2016-04-27 14:40:00", "stock": 1, "qty":4, "meta": {}, "previewImage":"https://placekitten.com/118/97"},
+		            {"name":"Power Cookie","description":"This cookie will put anything over 9000!", "price":12, "sku":"wcake", "date": "2016-04-26 14:40:00", "stock": 1, "qty":1, "meta": {"giftmessage":"Happy birthday!" }, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Chocolate Pizza","description":"Chocalate pizza is best pizza", "price":68, "sku":"ccake", "date": "2014-04-29 14:40:00", "stock": 1, "qty":4, "meta": {}, "previewImage":"https://placekitten.com/118/97"},
+		            {"name":"Death Cake","description":"This cake is the most delicious cake I ever ha...", "price":123, "sku":"ccake", "date": "2015-04-29 14:40:00", "stock": 1, "qty":41, "meta": {}, "previewImage":"https://placekitten.com/118/97"}
+                ],
+		        "message": "wishlist retrieved" 
+            },
+            "stubDelayMs": 20
+        },
+        "cart/validate": {
+            "requiredParams": {},
+            "shortDescription": "This worker computes totals, checks promos, and verifies inventory, etc.",
+            "stubReturn": {
+                "cartItems":[
+                    {"name":"White Cake","description":"This cake is the most bomb-digity cake ever!", "price":111, "sku":"wcake", "date": "2016-04-18 11:40:00", "stock": 1, "qty":1, "meta": {"giftmessage":"Happy birthday!" }, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Chocolate Cake","description":"Chocolate... MADE OUT OF CAKE!", "price":50, "sku":"ccake", "date": "2016-04-28 14:40:03", "stock": 1, "qty":47, "meta": {}, "previewImage":"https://placekitten.com/118/97"},
+		            {"name":"Really Really White Cake","description":"This cake goes well with birkenstocks and kombucha", "price":45, "sku":"wcake", "date": "2016-02-08 11:40:00", "stock": 1, "qty":1, "meta": {"giftmessage":"Happy birthday!" }, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"dWhite Cake","description":"This cake is only for Dwhite", "price":45, "sku":"wcake", "date": "2016-04-24 14:44:00", "stock": 1, "qty":12, "meta": {"giftmessage":"Happy birthday!" }, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Best Chocolate Cake","description":"This cake not made from chocolate", "price":56, "sku":"ccake", "date": "2011-04-28 14:40:00", "stock": 1, "qty":24, "meta": {}, "previewImage":"https://placekitten.com/118/97"},
+		            {"name":"Mega Cake","description":"This cake will help you jump and shoot", "price":35, "sku":"wcake", "date": "2016-01-28 14:40:00", "stock": 1, "qty":1, "meta": {"giftmessage":"Happy birthday!" }, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Oblate Mix","description":"This cake is the most circular cake ever!", "price":28, "sku":"ccake", "date": "2016-04-21 14:40:00", "stock": 1, "qty":4, "meta": {}, "previewImage":"https://placekitten.com/118/97"},
+		            {"name":"Brigand Cake","description":"This cake may take your money, so watch yourself", "price":78, "sku":"wcake", "date": "2016-04-28 14:10:10", "stock": 1, "qty":1, "meta": {"giftmessage":"Happy birthday!" }, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Ritual Cake","description":"This cake will satisfy all your ritualistic needs", "price":321, "sku":"ccake", "date": "2016-04-28 14:40:02", "stock": 1, "qty":4, "meta": {}, "previewImage":"https://placekitten.com/118/97"},
+		            {"name":"Power Cookie","description":"A cake that resonates with power", "price":12, "sku":"wcake", "date": "2016-04-28 14:40:01", "stock": 1, "qty":1, "meta": {"giftmessage":"Happy birthday!" }, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Chocolate Pizza","description":"Peperoni and chocolate! YUM!!!", "price":68, "sku":"ccake", "date": "2016-04-27 17:40:00", "stock": 1, "qty":4, "meta": {}, "previewImage":"https://placekitten.com/118/97"},
+		            {"name":"Death Cake","description":"A cake with a dark cloak and a sythe.", "price":123, "sku":"ccake", "date": "2016-06-28 14:46:00", "stock": 1, "qty":41, "meta": {}, "previewImage":"https://placekitten.com/118/97"}
+                ], 
+                "subtotal":95,
+                "shipping":5,
+                "tax":5.54,
+                "total":105.54,
+                "promos":["23","ABC"],
+                "DropListItems":{
+                    "Sort":[
+                        {"listID":"priceSort","listTitle":"Price"},
+                        {"listID":"nameSort","listTitle":"Name"},
+                        {"listID":"qtySort","listTitle":"QTY"},
+                        {"listID":"dateSort","listTitle":"Date"}
+                    ]
+                }
+            },
+            "stubDelayMs": 1200
+        },
+        "home/banners": {
+            "requiredParams": {},
+            "shortDescription": "This worker grabs homepage banners using the configParam.platform field",
+            "stubReturn": {
+                "images":["https://placekitten.com/265/309",
+                    "https://placekitten.com/1000/100",
+                    "https://placekitten.com/266/309",
+                    "https://placekitten.com/90/269"]
+            },
+            "stubDelayMs": 20
+        },
+	"submit":{
+	    "requiredParams": {},
+	    "shortDescription": "submit cart",
+    	    "stubReturn": {
+		"message": "The cats have recieved your cart"
+	    },
+	    "stubDelay": 100
+	},
+	"clear":{
+            "requiredParams": {},
+            "shortDescription": "clear cart",
+            "stubReturn": {
+                "message": "The cats have cleared your cart"
+            },
+            "stubDelay": 100
+        },
+	"cancel":{
+            "requiredParams": {},
+            "shortDescription": "cancel cart",
+            "stubReturn": {
+                "message": "The cats have canceled your cart"
+            },
+            "stubDelay": 100
+        },
+	"remove": {
+	    "requiredParams": {},
+	    "shortDescription": "remove cart item",
+	    "stubReturn": {
+		"message": "the cats have removed your item"
+	    },
+	    "stubDelay": 100
+	},
+        "categories/get": {
+            "requiredParams": {},
+            "shortDescription": "Gets categories depending on configParams.amount",
+            "stubReturn": {
+                "categories":[
+                    {"name":"Cake Batter Frozen Custard", "id":7},
+                    {"name":"Delicious Cakes", "id":1},
+                    {"name":"Amazing Cakes", "id":2},
+                    {"name":"Super Cookies", "id":3},
+                    {"name":"Candy Bars", "id":4},
+                    {"name":"Hard Sweets", "id":5},
+                    {"name":"Cheesecake", "id":6}
+                ]
+            },
+            "stubDelayMs": 100
+        },
+        "products/detail": {
+            "requiredParams": { "sku": "string" },
+            "shortDescription": "Gets a product",
+            "stubReturn": {
+                "name":"Super Cake", 
+                "desc":"This product is truly amazing", 
+                "price":34.95, 
+                "sku":"scake", 
+                "stock": 1, 
+                "previewImage":"https://placekitten.com/128/96",
+                "images":["https://placekitten.com/150/150",
+                    "https://placekitten.com/150/100",
+                    "https://placekitten.com/100/150",
+                    "https://placekitten.com/100/50"
+                ]
+            },
+            "stubDelayMs": 100
+        },
+        "products/category": {
+            "requiredParams": { "categoryId": "int64" },
+            "shortDescription": "Gets products in a category",
+            "stubReturn": {
+                "products":[
+                    {"name":"Power Cake", "price":9000.94, "sku":"pCake", "stock": 12, "previewImage":"https://placekitten.com/121/123"},
+                    {"name":"White Cake", "price":11.95, "sku":"wcake", "stock": 1, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Chocolate Cake", "price":10.95, "sku":"ccake", "stock": 0, "previewImage":"https://placekitten.com/96/86"},
+                    {"name":"Strawberry Cake", "price":22.95, "sku":"scake", "stock": 2, "previewImage":"https://placekitten.com/63/96"},
+                    {"name":"White Cake", "price":11.95, "sku":"wcake", "stock": 1, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Chocolate Cake", "price":10.95, "sku":"ccake", "stock": 0, "previewImage":"https://placekitten.com/96/86"},
+                    {"name":"Strawberry Cake", "price":22.95, "sku":"scake", "stock": 2, "previewImage":"https://placekitten.com/63/96"},
+                    {"name":"White Cake", "price":11.95, "sku":"wcake", "stock": 1, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Chocolate Cake", "price":10.95, "sku":"ccake", "stock": 0, "previewImage":"https://placekitten.com/96/86"},
+                    {"name":"Strawberry Cake", "price":22.95, "sku":"scake", "stock": 2, "previewImage":"https://placekitten.com/63/96"},
+                    {"name":"White Cake", "price":11.95, "sku":"wcake", "stock": 1, "previewImage":"https://placekitten.com/118/96"},
+                    {"name":"Chocolate Cake", "price":10.95, "sku":"ccake", "stock": 0, "previewImage":"https://placekitten.com/96/86"},
+                    {"name":"Strawberry Cake", "price":22.95, "sku":"scake", "stock": 2, "previewImage":"https://placekitten.com/63/96"}
+                ]
+            },
+            "stubDelayMs": 2000
+        },
+        "products/recommended": {
+            "requiredParams": { "userId": "string" },
+            "shortDescription": "Gets recommended products",
+            "stubReturn": {
+                "products":[
+                    {"name":"Mega Cake", "price":12.11, "sku":"mCake", "stock": 12, "previewImage":"https://placekitten.com/222/155"},
+                    {"name":"Super Cake", "price":10.00, "sku":"scake", "stock": 1, "previewImage":"https://placekitten.com/128/96"},
+                    {"name":"New Cookie", "price":10.00, "sku":"newcookie", "stock": 0, "previewImage":"https://placekitten.com/96/96"},
+                    {"name":"Peanut Butter", "price":10.00, "sku":"peanutbutter", "stock": 2, "previewImage":"https://placekitten.com/64/96"},
+                    {"name":"Candy Bar", "price":10.00, "sku":"candybar", "stock": 3, "previewImage":"https://placekitten.com/128/40"}
+                ]
+            },
+            "stubDelayMs": 200
+        },
+        "products/get-recommended-promo-prices": {
+            "requiredParams": {},
+            "shortDescription": "Gets recommended products special pricing if applicable",
+            "stubReturn": {
+                "products":[
+                    {"name":"Berserk Cookie", "price":13.13, "sku":"bCookie", "stock": 4, "previewImage":"https://placekitten.com/321/333"},
+                    {"name":"Super Cake", "price":19.95, "sku":"scake", "stock": 1, "previewImage":"https://placekitten.com/128/96"},
+                    {"name":"New Cookie", "price":4.95, "sku":"newcookie", "stock": 0, "previewImage":"https://placekitten.com/96/96"},
+                    {"name":"Peanut Butter", "price":2.95, "sku":"peanutbutter", "stock": 2, "previewImage":"https://placekitten.com/64/96"},
+                    {"name":"Candy Bar", "price":1.95, "sku":"candybar", "stock": 3, "previewImage":"https://placekitten.com/128/40"}
+                ]
+            },
+            "stubDelayMs": 200
         }
     },
 
     "engine": {
-        "version": "My Example API v1",
+        "version": "Fairmont Mobile Demo",
         "bind": ":8888",
-        "tlsCertFile": "cert.pem",
-        "tlsKeyFile": "key.pem",
+        "mqUrl": "amqp://dev:dev@192.168.56.105:5672/",
         "tlsEnabled": false,
-        "authMode": "hmac",
-        "prettyOutput": true,
-        "extraConfigFolder": "/etc/bolt/",
+        "authMode": "simple",
+        "prettyOutput": false,
         "docsEnabled": true,
         "advanced": {
             "stubMode": true,
-            "stubDelayMs": 5,
-            "completeResultExpiration": "120s",
+            "stubDelayMs": 50,
+            "completeResultExpiration": "30s",
             "completeResultLoopFreq": "5s",
             "debugFormEnabled": true
         }
     },
 
     "logging": {
-        "level": "info"
+        "level": "info",
+    	"logStatsDuration": "600s"
     },
 
     "security": {
-        "verifyTimeout": 30,
+        "verifyTimeout": 20,
         "groups": [{
             "name": "engineadmin",
-            "hmackey": "hmackey1_goes_here"
+            "hmackey": "admin_key_here"
         }, {
-            "name": "groupname2_goes_here",
-            "hmackey": "hmackey2_goes_here"
+            "name": "publicweb",
+            "hmackey": "webaccess1",
+            "requestsPerSecond": 500
         }, {
-            "name": "throttled_group",
-            "hmackey": "hmackey_goes_here",
-            "requestsPerSecond": 3
+            "name": "publicthrottled",
+            "hmackey": "throttleaccess1",
+            "requestsPerSecond": 10
         }],
         "handlerAccess": [{
           "handler": "/debug-log",
@@ -111,7 +612,7 @@
           "handler": "/stats",
           "allowGroups": ["engineadmin"]
         }],
-        "corsDomains":[],
+        "corsDomains":["http://localhost:8080"],
         "corsAutoAddLocal": true
     },
 
@@ -122,8 +623,9 @@
             "user": "write",
             "pass": "12345"
         },
-        "someGlobalOtherInfo": {
-            "filePath":"/resources"
+        "cdn": {
+            "base":"https://placekitten.com/"
         }
     }
 }
+

@@ -46,13 +46,20 @@ func (ah Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ah.Context.Engine.Stats.Ch("general").Ch("cors_requests").Incr()
 
 		if !utils.StringInSlice(origin, ah.Context.Engine.Config.Security.CorsDomains) {
-			http.Error(w, http.StatusText(http.StatusPreconditionFailed), http.StatusPreconditionFailed)
-			ah.Context.Engine.LogInfo("cors_error", logrus.Fields{
-				"method": r.Method, "url": r.URL.Path, "remoteaddr": r.RemoteAddr, "origin": origin,
-			}, "CORS")
-			return
+			//check if corsDomains contains *, then check if origin contains what preceeds the *
+			if !hasWild(origin, ah.Context.Engine.Config.Security.CorsDomains) {
+				http.Error(w, http.StatusText(http.StatusPreconditionFailed), http.StatusPreconditionFailed)
+				ah.Context.Engine.LogInfo("cors_error", logrus.Fields{
+					"method": r.Method, "url": r.URL.Path, "remoteaddr": r.RemoteAddr, "origin": origin,
+				}, "CORS")
+				return
+			} else { // * found in cores
+				w.Header().Add("Access-Control-Allow-Origin", origin)
+			}
+		} else { //origin was found in slice
+			w.Header().Add("Access-Control-Allow-Origin", origin)
 		}
-		w.Header().Add("Access-Control-Allow-Origin", origin)
+
 		w.Header().Add("Access-Control-Allow-Credentials", "true")
 		w.Header().Add("Access-Control-Allow-Headers", "Authorization, Bolt-No-Cache")
 		w.Header().Add("Access-Control-Allow-Methods", "OPTIONS, GET, POST")
@@ -315,4 +322,17 @@ func handlerAllowed(groupname, url, apiCall string, handlerAccess []config.Handl
 
 	// Group not explicitly allowed or denied.  Allow access by default.
 	return true
+}
+
+// hasWild checks the cors domains for *
+func hasWild(origin string, cors []string) bool {
+	for _, domain := range cors { //range over list of corsDomains
+		if strings.ContainsAny(domain, "*") { //check the strings for *
+			splitDomain := strings.Split(domain, "*")     //split the strings on *
+			if strings.Contains(origin, splitDomain[0]) { //if the origin contains the splitDomain
+				return true //wildcard found
+			}
+		}
+	}
+	return false //wildcard not found
 }

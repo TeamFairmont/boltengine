@@ -43,6 +43,22 @@ func (engine *Engine) HandleCall(reqtype int, w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	//Set the response header with the request header
+	for key, value := range r.Header {
+		if key != "Content-Length" {
+			for _, v := range value {
+				w.Header().Set(key, v)
+			}
+		}
+	} /*
+			auth := r.Header.Get("Authorization")
+			if auth != "" {
+				w.Header().Set("Authorization", auth)
+			}
+
+		cv3go.PrintToFile([]byte(fmt.Sprint(r.Header)), "./r")
+		cv3go.PrintToFile([]byte(fmt.Sprint(w.Header())), "./w")
+	*/
 	if strings.ToUpper(r.Method) == "POST" {
 		//call extract and validation
 		cmd, payload, err := callVars(r)

@@ -5,6 +5,7 @@
 package bolt
 
 import (
+	"errors"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -13,6 +14,8 @@ import (
 	"github.com/TeamFairmont/boltshared/utils"
 	"github.com/TeamFairmont/gabs"
 )
+
+var count = 0
 
 func (engine *Engine) workerStub() {
 	engine.LogWarn("worker_stub", nil, "stubMode true, running a worker stub for all config'ed commands!")
@@ -44,6 +47,7 @@ func (engine *Engine) workerStub() {
 
 	//TODO error if required params missing from stubs
 	//spin up queues and goroutines for each command
+	count = 0
 	for k, cmd := range allcommands {
 		q, res, err := mqwrapper.CreateConsumeNamedQueue(engine.Config.Engine.Advanced.QueuePrefix+k, mq.Channel)
 		if err != nil {
@@ -53,13 +57,34 @@ func (engine *Engine) workerStub() {
 			name := k
 			command := cmd
 			meta, metaok := engine.Config.CommandMetas[name]
-			go func() {
+			go func(k string) {
+				currentIteration := utils.GetBoltIteration()
+				//waits here untill a worker stub is queried, then infinite loop
 				for d := range res {
+					keepAlive, err := utils.CheckBoltIteration(currentIteration)
+					if err != nil {
+						engine.LogError("worker_stub", logrus.Fields{"Error": err}, "Error with CheckBoltIteration(), in workerStub()")
+					}
 					engine.LogDebug("worker_stub", logrus.Fields{"command": q.Name, "id": d.CorrelationId, "payload": string(d.Body)}, "Command received")
 
 					payload, err := gabs.ParseJSON(d.Body)
 					if err != nil {
 						engine.LogError("worker_stub", logrus.Fields{"command": q.Name, "id": d.CorrelationId, "payload": string(d.Body)}, "Payload malformed, not valid JSON")
+					}
+					// Get the requiredParams from the desired command name "k" from the config
+					reqParams := engine.Config.CommandMetas[k].RequiredParams
+					// Check for requiredParams
+					for reqParamKey := range reqParams {
+						if !payload.Path("initial_input").Exists(reqParamKey) {
+							// if the required parameters are not in initial_input
+							children, err := payload.Path("trace").Path("command").Children()
+							if err != nil {
+								engine.LogError("RequiredParams", logrus.Fields{"ev": err}, "Error with reqiuredParams gabs children")
+							}
+							for _, child := range children {
+								engine.LogError("RequiredParams", logrus.Fields{"ev": errors.New("Missing Required Parameters")}, "Error Command "+child.Data().(string)+" Required Parameters Missing")
+							}
+						}
 					}
 
 					//stub data values
@@ -119,18 +144,18 @@ func (engine *Engine) workerStub() {
 					if err != nil {
 						engine.LogError("worker_stub", logrus.Fields{"command": command, "err": err}, "Worker stub failed to publish command result")
 					}
-
 					//ack to queue that this message is done
 					d.Ack(false)
 					engine.LogInfo("worker_stub", logrus.Fields{"command": q.Name, "id": d.CorrelationId}, "Command completed")
-				}
-			}()
 
+					//happens after reboot but only after a api call
+					if !keepAlive {
+						return
+					}
+				}
+			}(k)
 			engine.LogInfo("worker_stub", logrus.Fields{"command": name}, "Worker stub registered for command")
 		}
 	}
-
 	engine.LogInfo("worker_stub", nil, "Worker Stub waiting for commands...")
-	//forever := make(chan bool)
-	//<-forever
 }

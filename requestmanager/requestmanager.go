@@ -12,7 +12,12 @@ import (
 
 	"github.com/TeamFairmont/boltengine/commandprocess"
 	"github.com/TeamFairmont/boltshared/config"
+	"github.com/TeamFairmont/boltshared/utils"
 	"github.com/TeamFairmont/gabs"
+)
+
+var (
+	cou = 0
 )
 
 // RequestManager for use tracking CommandProcess
@@ -44,7 +49,7 @@ func NewRequestManager() *RequestManager {
 	rm.getRequestChan = make(chan getRequest)
 	rm.delRequestChan = make(chan string) //should this have a buffer & config var ?
 
-	go func() {
+	go func() { //uses done channel to exit on reboot
 		for {
 			select {
 			case nr := <-rm.newRequestChan:
@@ -60,6 +65,8 @@ func NewRequestManager() *RequestManager {
 				rm.mutex.Lock()
 				delete(rm.requests, id)
 				rm.mutex.Unlock()
+			case <-utils.GetDoneChannel(): //if done channel is closed
+				return
 			}
 		}
 	}()

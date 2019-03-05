@@ -75,6 +75,9 @@ func BuiltinHandlers(eng *Engine) {
 	//save custom bolt configs and reload the config
 	eng.Mux.Handle("/save-config", Handler{Context: eng.ContextAuth, H: coreHandleSaveConfig})
 
+	// handler for engine reboot
+	eng.Mux.Handle("/engine-reboot", Handler{Context: eng.ContextAuth, H: coreHandleReboot})
+
 	//handlers for custom api calls
 	apicallHandlers(eng)
 }

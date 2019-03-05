@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -33,7 +34,74 @@ import (
 
 var (
 	debugFormTemplate *template.Template
+	coun              = 1
+	listenChan        = make(chan *ListenerD, 1)
+	done              = make(chan bool)
+	startSig          = true //keeps the os.SIGNAL go routine open once
 )
+
+// GetListenChan sends the stoppable listener
+func GetListenChan() *ListenerD {
+	return <-listenChan
+}
+
+// ListenerD is a stoppable listener to be used when serving the bolt engine
+// It will allow the engine to free up the port the server is bound to
+type ListenerD struct {
+	*net.TCPListener           //wraps TCPListener
+	stop             chan bool //channel to signal a closing sequence
+}
+
+// NewListenerD builds a new listenerD
+func NewListenerD(listener net.Listener) (*ListenerD, error) {
+	tcpListener, ok := listener.(*net.TCPListener)
+	if !ok {
+		return nil, errors.New("Problem wrapping listener")
+	}
+
+	retListener := &ListenerD{}
+	retListener.TCPListener = tcpListener
+	retListener.stop = make(chan bool)
+
+	return retListener, nil
+}
+
+// Accept accepts
+func (listenerD *ListenerD) Accept() (net.Conn, error) {
+	for {
+		listenerD.SetDeadline(time.Now().Add(time.Second))
+		newConn, err := listenerD.TCPListener.Accept()
+		//check to see if the stop channel is closed
+		select {
+		case <-listenerD.stop:
+			{
+				utils.SignalResDoneChan() // it is now safe to reboot.  Otherwise the tcp port is still bound
+
+				if err == nil { // if the channel is closed
+					newConn.Close()
+				}
+				return nil, errors.New("Listener Stopped")
+			}
+		default:
+			{
+				// if the channel is still open
+			}
+		}
+		if err != nil {
+			netErr, ok := err.(net.Error)
+			if ok && netErr.Timeout() && netErr.Temporary() {
+				continue
+			}
+		}
+		return newConn, err
+	}
+}
+
+// Stop stops the listener
+func (listenerD *ListenerD) Stop() {
+	close(listenerD.stop)
+
+}
 
 // Engine holds config info, server struct, etc for a running engine
 type Engine struct {
@@ -197,16 +265,21 @@ func (engine *Engine) ListenAndServe() error {
 			go engine.workerStub()
 		}
 
-		// Intercept signal notifications for clean shutdown
-		signalChan := make(chan os.Signal, 1)
-		signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
-		go func() {
-			for sig := range signalChan {
-				engine.LogInfo("os_interrupt", logrus.Fields{"signal": sig}, "OS Signal Received")
-				engine.Shutdown()
-			}
-		}()
+		//this should only hgappen once, does not need to repeat on reboot
+		if startSig {
+			startSig = false
+			// Intercept signal notifications for clean shutdown
+			signalChan := make(chan os.Signal, 1)
+			signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
 
+			//this will stay alive after reboots
+			go func() {
+				for sig := range signalChan {
+					engine.LogInfo("os_interrupt", logrus.Fields{"signal": sig}, "OS Signal Received")
+					engine.Shutdown()
+				}
+			}()
+		}
 		//finally start
 		engine.Stats.Ch("general").Ch("engine_start").V(time.Now())
 		engine.LogInfo("start", logrus.Fields{
@@ -227,12 +300,22 @@ func (engine *Engine) ListenAndServe() error {
 				"bind":    utils.GetLocalIP() + engine.Config.Engine.Bind,
 			}, "NOT running over https! Use tlsEnabled before going to production")
 
+			//Start implementing the custom listener
+			normalListener, err := net.Listen("tcp", engine.Server.Addr)
+			if err != nil {
+				panic(err)
+			}
+			listenerD, err := NewListenerD(normalListener)
+			if err != nil {
+				panic(err)
+			} //send the listener, so it can be rebooted
+			listenChan <- listenerD
+
 			// Start the non-TLSed engine services
-			engine.LogFatal("start", logrus.Fields{
-				"engine.Server.ListenAndServe()": engine.Server.ListenAndServe(),
+			engine.LogWarn("start", logrus.Fields{ //use custom listener
+				"engine.Server.ListenAndServe()": engine.Server.Serve(listenerD), //use custom listenerD
 			}, "ListenAndServe()")
 		}
-
 		return nil
 	}
 	return errors.New("No config loaded")
@@ -247,6 +330,9 @@ func CreateTestEngine(loglevel string) *Engine {
 	engine.Log = logrus.StandardLogger()
 
 	cfg, err := config.DefaultConfig()
+	if err != nil {
+		return nil
+	}
 	cfg, err = config.CustomizeConfig(cfg, config.TestConfigJSON)
 	if err != nil {
 		return nil
@@ -269,7 +355,7 @@ func (engine *Engine) Shutdown() bool {
 		engine.LogInfo("shutdown", logrus.Fields{"count": engine.Requests.Count()}, "Shutdown started.")
 		startTime := time.Now()
 		engine.shutdown = true
-		go func() {
+		go func() { //seems to be reboot safe
 			d, _ := time.ParseDuration("5s")
 			shutdownResultExpiration, err := time.ParseDuration(engine.Config.Engine.Advanced.ShutdownResultExpiration)
 			if err != nil {
@@ -281,13 +367,12 @@ func (engine *Engine) Shutdown() bool {
 				engine.LogError("config", nil, "engine.advanced.shutdownForceQuit error: couldn't parse. Using 120s as default")
 				forceQuit, _ = time.ParseDuration("120s")
 			}
-
 			//loop, wait for expiring results
 			for {
 				exp := engine.Requests.ExpireCompletedRequests(shutdownResultExpiration)
 				engine.LogInfo("shutdown", logrus.Fields{"count": engine.Requests.Count(), "expired": len(exp)}, "Shutdown in progress...")
 				if engine.Requests.Count() > 0 {
-					diff := time.Now().Sub(startTime)
+					diff := time.Since(startTime)
 					if diff >= forceQuit {
 						engine.LogWarn("shutdown", logrus.Fields{"count": engine.Requests.Count()}, "Shutdown before all requests complete or expired")
 						os.Exit(0)
@@ -296,6 +381,7 @@ func (engine *Engine) Shutdown() bool {
 				} else {
 					engine.LogInfo("shutdown", nil, "Shutdown complete")
 					os.Exit(0)
+					return
 				}
 			}
 		}()
@@ -310,6 +396,7 @@ func (engine *Engine) IsShutdown() bool {
 }
 
 // workerErrorQueue logs any messages received via the Prefix+ErrorQueue
+// used as a go routine
 func (engine *Engine) workerErrorQueue(reconnectsig chan bool) {
 	//engine.Config.Engine.Advanced.QueuePrefix+engine.Config.Engine.Advanced.ErrorQueue
 	_, res, err := mqwrapper.CreateConsumeNamedQueue(engine.Config.Engine.Advanced.QueuePrefix+config.ErrorQueueName, engine.mqConnection.Channel)
@@ -318,7 +405,9 @@ func (engine *Engine) workerErrorQueue(reconnectsig chan bool) {
 	} else {
 
 		for {
-			select {
+			select { // allow the go routine to exit on reboot
+			case <-utils.GetDoneChannel():
+				return
 			case <-reconnectsig:
 				_, res, err = mqwrapper.CreateConsumeNamedQueue(engine.Config.Engine.Advanced.QueuePrefix+config.ErrorQueueName, engine.mqConnection.Channel)
 				if err != nil {
@@ -331,7 +420,6 @@ func (engine *Engine) workerErrorQueue(reconnectsig chan bool) {
 				}
 				d.Ack(false)
 			}
-
 		}
 	}
 }
@@ -344,8 +432,16 @@ func (engine *Engine) recoverMqConnection() {
 
 	disc := engine.mqConnection.Connection.NotifyClose(make(chan *amqp.Error))
 	d, _ := time.ParseDuration("1s")
-	go func() {
-		for {
+	go func() { // set currentIteration to the current boltIteration
+		currentIteration := utils.GetBoltIteration()
+		for { //check if the currentIteration matches the current boltIteration
+			keepAlive, err := utils.CheckBoltIteration(currentIteration)
+			if err != nil {
+				engine.LogError("config", logrus.Fields{"Error": err}, "Error with CheckBoltIteration(), in recoverMQConnection")
+			}
+			if !keepAlive { //if currentIteration does not match boltIteration, close the go routine
+				return
+			}
 		DisconnectEvent:
 			for ev := range disc {
 				engine.LogDebug("mq_ev", logrus.Fields{"ev": ev}, "Range disc")
@@ -371,7 +467,6 @@ func (engine *Engine) recoverMqConnection() {
 
 // expireResults periodically clears all completed results from the request manager
 func (engine *Engine) expireResults() {
-
 	d, err := time.ParseDuration(engine.Config.Engine.Advanced.CompleteResultLoopFreq)
 	if err != nil {
 		engine.LogError("config", nil, "engine.advanced.completeResultLoopFreq error: couldn't parse. Using 10s as default")
@@ -383,14 +478,22 @@ func (engine *Engine) expireResults() {
 		engine.LogError("config", nil, "engine.advanced.completeResultExpiration error: couldn't parse. Using 10s as default")
 		completeResultExpiration, _ = time.ParseDuration("10s")
 	}
-
 	for {
-		time.Sleep(d)
-		if !engine.IsShutdown() {
-			expired := engine.Requests.ExpireCompletedRequests(completeResultExpiration)
-			for id := range expired {
-				engine.LogInfo("call_expired", logrus.Fields{"id": expired[id]}, "")
-				engine.Stats.Ch("general").Ch("expired_results").Incr()
+		select {
+		case <-utils.GetDoneChannel():
+			{
+				return
+			}
+		default:
+			{
+				time.Sleep(d) //d = 5s
+				if !engine.IsShutdown() {
+					expired := engine.Requests.ExpireCompletedRequests(completeResultExpiration)
+					for id := range expired {
+						engine.LogInfo("call_expired", logrus.Fields{"id": expired[id]}, "")
+						engine.Stats.Ch("general").Ch("expired_results").Incr()
+					}
+				}
 			}
 		}
 	}
@@ -398,11 +501,21 @@ func (engine *Engine) expireResults() {
 
 // logStats periodically writes the stat json to info log
 func (engine *Engine) logStats() {
-	d, _ := time.ParseDuration("600s") //default 10 minutes, TODO: config var
+	// sets the current iteration with the current boltIteration
+	currentIteration := utils.GetBoltIteration()
+	d, _ := time.ParseDuration(engine.Config.Logging.LogStatsDuration) //default 10 minutes,
 	for {
-		time.Sleep(d)
+		time.Sleep(d) //d
 		json, _ := engine.Stats.JSON()
 		engine.LogInfo("stats", logrus.Fields{}, json)
+		// compare the current boltIteration to this go routines currentIteration
+		keepAlive, err := utils.CheckBoltIteration(currentIteration)
+		if err != nil {
+			engine.LogError("keepAlive", logrus.Fields{"Error": err}, "Error with CheckBoltIteration(), in logStats")
+		}
+		if !keepAlive { //if the current bolt iteration does not match the go routines iteration
+			return // end the go routine
+		}
 	}
 }
 
@@ -426,14 +539,14 @@ var flags = []string{"/request/",
 // ExtractCallName pulls the API call name from the URL and returns the string.
 func ExtractCallName(r *http.Request) (string, error) {
 
-	//loops through the array of flags
-	//If the beginning of the URL.Path matches a flag exactly
-	//remove the flag and return the remaining URL.Path and a nil error
+	// loops through the array of flags
+	// If the beginning of the URL.Path matches a flag exactly
+	// remove the flag and return the remaining URL.Path and a nil error
 	for _, flag := range flags {
 		if len(r.URL.Path) >= len(flag) && r.URL.Path[:len(flag)] == flag {
 			return r.URL.Path[len(flag):], nil
 		}
-	} //if it matches nothing it is an error
+	} // if it matches nothing it is an error
 	return r.URL.Path, errors.New("Invalid flag, couldn't extract call")
 }
 
@@ -446,10 +559,11 @@ func OutputError(w http.ResponseWriter, err *bolterror.BoltError) {
 
 // OutputRequest filters the payload and writes a call request to w
 func (engine *Engine) OutputRequest(w http.ResponseWriter, req *commandprocess.CommandProcess, filterKeys []string) {
-	ret := ""
+	var ret string
+	//ret = ""
 	var payload *gabs.Container
 	var err error
-	//if filter keys is nil, do not filter
+	// if filter keys is nil, do not filter
 	if filterKeys != nil {
 		payload, err = utils.FilterPayload(req.Payload, filterKeys)
 	} else {
@@ -483,7 +597,6 @@ func (engine *Engine) OutputDebugForm(w http.ResponseWriter, r *http.Request) {
 
 		apicall, ok := engine.Config.APICalls[cmd]
 		if !ok {
-			//engine.OutputError(w, bolterror.NewBoltError(nil, "request", "Unknown API Call", cmd, bolterror.Request))
 			debugFormTemplate.Execute(w, debugFormFields{CommandName: "(Unknown API Call)", CommandInfo: nil})
 			return
 		}
