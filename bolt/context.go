@@ -9,11 +9,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/TeamFairmont/boltengine/throttling"
 	"github.com/TeamFairmont/boltshared/config"
 	"github.com/TeamFairmont/boltshared/security"
 	"github.com/TeamFairmont/boltshared/utils"
+	"github.com/sirupsen/logrus"
 )
 
 // Context containts the variables relevant to this http request (engine, logger, etc)

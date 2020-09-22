@@ -4,10 +4,12 @@
 
 package bolt
 
-import log "github.com/Sirupsen/logrus"
-import "github.com/TeamFairmont/boltshared/config"
+import (
+	"github.com/TeamFairmont/boltshared/config"
+	"github.com/sirupsen/logrus"
+)
 
 func addSysLogHook(cfg *config.Config) {
-	log.Warnln("Windows does NOT support syslog logging mode!")
+	logrus.Warnln("Windows does NOT support syslog logging mode!")
 	return
 }

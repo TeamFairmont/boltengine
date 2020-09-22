@@ -16,12 +16,7 @@ import (
 	"syscall"
 	"time"
 
-	"gopkg.in/go-redis/cache.v1"
-
-	"github.com/Sirupsen/logrus"
 	"github.com/TeamFairmont/amqp"
-	"github.com/TeamFairmont/gabs"
-
 	"github.com/TeamFairmont/boltengine/bolterror"
 	"github.com/TeamFairmont/boltengine/commandprocess"
 	"github.com/TeamFairmont/boltengine/requestmanager"
@@ -30,6 +25,10 @@ import (
 	"github.com/TeamFairmont/boltshared/mqwrapper"
 	"github.com/TeamFairmont/boltshared/stats"
 	"github.com/TeamFairmont/boltshared/utils"
+	"github.com/TeamFairmont/gabs"
+	"github.com/sirupsen/logrus"
+
+	"gopkg.in/go-redis/cache.v1"
 )
 
 var (

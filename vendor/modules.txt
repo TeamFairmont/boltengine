@@ -1,0 +1,131 @@
+# github.com/TeamFairmont/amqp v0.0.0-20160324192726-64bf09106747
+## explicit
+github.com/TeamFairmont/amqp
+# github.com/TeamFairmont/boltshared v0.0.0-20190305215442-725c2af7d44e
+## explicit
+github.com/TeamFairmont/boltshared/config
+github.com/TeamFairmont/boltshared/mqwrapper
+github.com/TeamFairmont/boltshared/security
+github.com/TeamFairmont/boltshared/stats
+github.com/TeamFairmont/boltshared/utils
+github.com/TeamFairmont/boltshared/validation
+# github.com/TeamFairmont/gabs v0.0.0-20160324192753-3f62ae6fa722
+## explicit
+github.com/TeamFairmont/gabs
+# github.com/TeamFairmont/go.uuid v0.0.0-20160324192707-5afbb870b6f4
+## explicit
+github.com/TeamFairmont/go.uuid
+# github.com/davecgh/go-spew v1.1.1
+github.com/davecgh/go-spew/spew
+# github.com/garyburd/redigo v1.6.2
+## explicit
+# github.com/golang/protobuf v1.4.2
+github.com/golang/protobuf/proto
+# github.com/gorilla/mux v1.8.0
+## explicit
+github.com/gorilla/mux
+# github.com/konsorten/go-windows-terminal-sequences v1.0.3
+github.com/konsorten/go-windows-terminal-sequences
+# github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e
+## explicit
+# github.com/onsi/ginkgo v1.14.1
+## explicit
+# github.com/onsi/gomega v1.10.2
+## explicit
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
+# github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
+## explicit
+github.com/rifflock/lfshook
+# github.com/sirupsen/logrus v1.6.0
+## explicit
+github.com/sirupsen/logrus
+github.com/sirupsen/logrus/hooks/syslog
+# github.com/streadway/amqp v1.0.0
+## explicit
+# github.com/stretchr/testify v1.3.0
+## explicit
+github.com/stretchr/testify/assert
+# github.com/weekface/mgorus v0.0.0-20181029072001-239539fe10e4
+## explicit
+github.com/weekface/mgorus
+# github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f
+github.com/xeipuuv/gojsonpointer
+# github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415
+github.com/xeipuuv/gojsonreference
+# github.com/xeipuuv/gojsonschema v1.2.0
+## explicit
+github.com/xeipuuv/gojsonschema
+# golang.org/x/net v0.0.0-20200520004742-59133d7f0dd7
+golang.org/x/net/context
+# golang.org/x/sys v0.0.0-20200519105757-fe76b779f299
+golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/unix
+# google.golang.org/appengine v1.6.6
+## explicit
+google.golang.org/appengine
+google.golang.org/appengine/datastore
+google.golang.org/appengine/datastore/internal/cloudkey
+google.golang.org/appengine/datastore/internal/cloudpb
+google.golang.org/appengine/internal
+google.golang.org/appengine/internal/app_identity
+google.golang.org/appengine/internal/base
+google.golang.org/appengine/internal/datastore
+google.golang.org/appengine/internal/log
+google.golang.org/appengine/internal/modules
+google.golang.org/appengine/internal/remote_api
+# google.golang.org/protobuf v1.23.0
+google.golang.org/protobuf/encoding/prototext
+google.golang.org/protobuf/encoding/protowire
+google.golang.org/protobuf/internal/descfmt
+google.golang.org/protobuf/internal/descopts
+google.golang.org/protobuf/internal/detrand
+google.golang.org/protobuf/internal/encoding/defval
+google.golang.org/protobuf/internal/encoding/messageset
+google.golang.org/protobuf/internal/encoding/tag
+google.golang.org/protobuf/internal/encoding/text
+google.golang.org/protobuf/internal/errors
+google.golang.org/protobuf/internal/fieldnum
+google.golang.org/protobuf/internal/fieldsort
+google.golang.org/protobuf/internal/filedesc
+google.golang.org/protobuf/internal/filetype
+google.golang.org/protobuf/internal/flags
+google.golang.org/protobuf/internal/genname
+google.golang.org/protobuf/internal/impl
+google.golang.org/protobuf/internal/mapsort
+google.golang.org/protobuf/internal/pragma
+google.golang.org/protobuf/internal/set
+google.golang.org/protobuf/internal/strs
+google.golang.org/protobuf/internal/version
+google.golang.org/protobuf/proto
+google.golang.org/protobuf/reflect/protoreflect
+google.golang.org/protobuf/reflect/protoregistry
+google.golang.org/protobuf/runtime/protoiface
+google.golang.org/protobuf/runtime/protoimpl
+# gopkg.in/bsm/ratelimit.v1 v1.0.0-20160220154919-db14e161995a
+## explicit
+gopkg.in/bsm/ratelimit.v1
+# gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b
+## explicit
+# gopkg.in/go-redis/cache.v1 v1.0.1
+## explicit
+gopkg.in/go-redis/cache.v1
+gopkg.in/go-redis/cache.v1/lrucache
+# gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
+## explicit
+gopkg.in/mgo.v2
+gopkg.in/mgo.v2/bson
+gopkg.in/mgo.v2/internal/json
+gopkg.in/mgo.v2/internal/sasl
+gopkg.in/mgo.v2/internal/scram
+# gopkg.in/redis.v3 v3.6.4
+## explicit
+gopkg.in/redis.v3
+gopkg.in/redis.v3/internal
+gopkg.in/redis.v3/internal/consistenthash
+gopkg.in/redis.v3/internal/hashtag
+gopkg.in/redis.v3/internal/pool
+# gopkg.in/vmihailenco/msgpack.v2 v2.9.1
+## explicit
+gopkg.in/vmihailenco/msgpack.v2
+gopkg.in/vmihailenco/msgpack.v2/codes

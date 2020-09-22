@@ -8,11 +8,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/TeamFairmont/boltshared/config"
 	"github.com/TeamFairmont/boltshared/mqwrapper"
 	"github.com/TeamFairmont/boltshared/utils"
 	"github.com/TeamFairmont/gabs"
+	"github.com/sirupsen/logrus"
 )
 
 var count = 0

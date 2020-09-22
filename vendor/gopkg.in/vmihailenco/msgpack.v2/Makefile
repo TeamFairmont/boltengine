@@ -1,4 +1,5 @@
 all:
-	go test gopkg.in/vmihailenco/msgpack.v2 -cpu=1
-	go test gopkg.in/vmihailenco/msgpack.v2 -cpu=2
-	go test gopkg.in/vmihailenco/msgpack.v2 -short -race
+	go test ./...
+	env GOOS=linux GOARCH=386 go test ./...
+	go test ./... -short -race
+	go vet

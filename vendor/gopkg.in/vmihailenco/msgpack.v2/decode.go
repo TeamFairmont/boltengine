@@ -12,41 +12,53 @@ import (
 	"gopkg.in/vmihailenco/msgpack.v2/codes"
 )
 
+const bytesAllocLimit = 1024 * 1024 // 1mb
+
 type bufReader interface {
 	Read([]byte) (int, error)
 	ReadByte() (byte, error)
 	UnreadByte() error
 }
 
-func Unmarshal(b []byte, v ...interface{}) error {
-	if len(v) == 1 && v[0] != nil {
-		unmarshaler, ok := v[0].(Unmarshaler)
-		if ok {
-			return unmarshaler.UnmarshalMsgpack(b)
-		}
+func newBufReader(r io.Reader) bufReader {
+	if br, ok := r.(bufReader); ok {
+		return br
 	}
-	return NewDecoder(bytes.NewReader(b)).Decode(v...)
+	return bufio.NewReader(r)
+}
+
+func makeBuffer() []byte {
+	return make([]byte, 0, 64)
+}
+
+// Unmarshal decodes the MessagePack-encoded data and stores the result
+// in the value pointed to by v.
+func Unmarshal(data []byte, v ...interface{}) error {
+	return NewDecoder(bytes.NewReader(data)).Decode(v...)
 }
 
 type Decoder struct {
-	// TODO: add map len arg
 	DecodeMapFunc func(*Decoder) (interface{}, error)
 
 	r   bufReader
 	buf []byte
+
+	extLen int
+	rec    []byte // accumulates read data if not nil
 }
 
 func NewDecoder(r io.Reader) *Decoder {
-	br, ok := r.(bufReader)
-	if !ok {
-		br = bufio.NewReader(r)
-	}
 	return &Decoder{
 		DecodeMapFunc: decodeMap,
 
-		r:   br,
-		buf: make([]byte, 64),
+		r:   newBufReader(r),
+		buf: makeBuffer(),
 	}
+}
+
+func (d *Decoder) Reset(r io.Reader) error {
+	d.r = newBufReader(r)
+	return nil
 }
 
 func (d *Decoder) Decode(v ...interface{}) error {
@@ -68,8 +80,7 @@ func (d *Decoder) decode(dst interface{}) error {
 		}
 	case *[]byte:
 		if v != nil {
-			*v, err = d.DecodeBytes()
-			return err
+			return d.decodeBytesPtr(v)
 		}
 	case *int:
 		if v != nil {
@@ -137,9 +148,11 @@ func (d *Decoder) decode(dst interface{}) error {
 			return err
 		}
 	case *[]string:
-		return d.decodeIntoStrings(v)
+		return d.decodeStringSlicePtr(v)
 	case *map[string]string:
-		return d.decodeIntoMapStringString(v)
+		return d.decodeMapStringStringPtr(v)
+	case *map[string]interface{}:
+		return d.decodeMapStringInterfacePtr(v)
 	case *time.Duration:
 		if v != nil {
 			vv, err := d.DecodeInt64()
@@ -160,6 +173,10 @@ func (d *Decoder) decode(dst interface{}) error {
 	if v.Kind() != reflect.Ptr {
 		return fmt.Errorf("msgpack: Decode(nonsettable %T)", dst)
 	}
+	v = v.Elem()
+	if !v.IsValid() {
+		return fmt.Errorf("msgpack: Decode(nonsettable %T)", dst)
+	}
 	return d.DecodeValue(v)
 }
 
@@ -169,7 +186,7 @@ func (d *Decoder) DecodeValue(v reflect.Value) error {
 }
 
 func (d *Decoder) DecodeNil() error {
-	c, err := d.r.ReadByte()
+	c, err := d.readByte()
 	if err != nil {
 		return err
 	}
@@ -180,7 +197,7 @@ func (d *Decoder) DecodeNil() error {
 }
 
 func (d *Decoder) DecodeBool() (bool, error) {
-	c, err := d.r.ReadByte()
+	c, err := d.readByte()
 	if err != nil {
 		return false, err
 	}
@@ -197,54 +214,51 @@ func (d *Decoder) bool(c byte) (bool, error) {
 	return false, fmt.Errorf("msgpack: invalid code %x decoding bool", c)
 }
 
-func (d *Decoder) boolValue(value reflect.Value) error {
-	v, err := d.DecodeBool()
-	if err != nil {
-		return err
-	}
-	value.SetBool(v)
-	return nil
-}
-
 func (d *Decoder) interfaceValue(v reflect.Value) error {
-	iface, err := d.DecodeInterface()
+	vv, err := d.DecodeInterface()
 	if err != nil {
 		return err
 	}
-	if iface != nil {
-		v.Set(reflect.ValueOf(iface))
+	if vv != nil {
+		if v.Type() == errorType {
+			if vv, ok := vv.(string); ok {
+				v.Set(reflect.ValueOf(errors.New(vv)))
+				return nil
+			}
+		}
+
+		v.Set(reflect.ValueOf(vv))
 	}
 	return nil
 }
 
-// Decodes value into interface. Possible value types are:
+// DecodeInterface decodes value into interface. Possible value types are:
 //   - nil,
-//   - int64,
-//   - uint64,
 //   - bool,
+//   - int64 for negative numbers,
+//   - uint64 for positive numbers,
 //   - float32 and float64,
 //   - string,
 //   - slices of any of the above,
 //   - maps of any of the above.
 func (d *Decoder) DecodeInterface() (interface{}, error) {
-	c, err := d.r.ReadByte()
+	c, err := d.readByte()
 	if err != nil {
 		return nil, err
 	}
 
 	if codes.IsFixedNum(c) {
-		if c >= 0 {
-			return d.uint(c)
+		if int8(c) < 0 {
+			return d.int(c)
 		}
-		return d.int(c)
+		return d.uint(c)
 	}
 	if codes.IsFixedMap(c) {
 		d.r.UnreadByte()
 		return d.DecodeMap()
 	}
 	if codes.IsFixedArray(c) {
-		d.r.UnreadByte()
-		return d.DecodeSlice()
+		return d.decodeSlice(c)
 	}
 	if codes.IsFixedString(c) {
 		return d.string(c)
@@ -264,16 +278,16 @@ func (d *Decoder) DecodeInterface() (interface{}, error) {
 	case codes.Int8, codes.Int16, codes.Int32, codes.Int64:
 		return d.int(c)
 	case codes.Bin8, codes.Bin16, codes.Bin32:
-		return d.bytes(c)
+		return d.bytes(c, nil)
 	case codes.Str8, codes.Str16, codes.Str32:
 		return d.string(c)
 	case codes.Array16, codes.Array32:
-		d.r.UnreadByte()
-		return d.DecodeSlice()
+		return d.decodeSlice(c)
 	case codes.Map16, codes.Map32:
 		d.r.UnreadByte()
 		return d.DecodeMap()
-	case codes.FixExt1, codes.FixExt2, codes.FixExt4, codes.FixExt8, codes.FixExt16, codes.Ext8, codes.Ext16, codes.Ext32:
+	case codes.FixExt1, codes.FixExt2, codes.FixExt4, codes.FixExt8, codes.FixExt16,
+		codes.Ext8, codes.Ext16, codes.Ext32:
 		return d.ext(c)
 	}
 
@@ -282,7 +296,7 @@ func (d *Decoder) DecodeInterface() (interface{}, error) {
 
 // Skip skips next value.
 func (d *Decoder) Skip() error {
-	c, err := d.r.ReadByte()
+	c, err := d.readByte()
 	if err != nil {
 		return err
 	}
@@ -323,9 +337,9 @@ func (d *Decoder) Skip() error {
 	return fmt.Errorf("msgpack: unknown code %x", c)
 }
 
-// peekCode returns the next Msgpack code. See
+// peekCode returns next MessagePack code. See
 // https://github.com/msgpack/msgpack/blob/master/spec.md#formats for details.
-func (d *Decoder) peekCode() (code byte, err error) {
+func (d *Decoder) PeekCode() (code byte, err error) {
 	code, err = d.r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -333,18 +347,79 @@ func (d *Decoder) peekCode() (code byte, err error) {
 	return code, d.r.UnreadByte()
 }
 
-func (d *Decoder) gotNilCode() bool {
-	code, err := d.peekCode()
+func (d *Decoder) hasNilCode() bool {
+	code, err := d.PeekCode()
 	return err == nil && code == codes.Nil
 }
 
-func (d *Decoder) readN(n int) ([]byte, error) {
-	var b []byte
-	if n <= cap(d.buf) {
-		b = d.buf[:n]
-	} else {
-		b = make([]byte, n)
+func (d *Decoder) readByte() (byte, error) {
+	c, err := d.r.ReadByte()
+	if err != nil {
+		return 0, err
 	}
+	if d.rec != nil {
+		d.rec = append(d.rec, c)
+	}
+	return c, nil
+}
+
+func (d *Decoder) readFull(b []byte) error {
 	_, err := io.ReadFull(d.r, b)
-	return b, err
+	if err != nil {
+		return err
+	}
+	if d.rec != nil {
+		d.rec = append(d.rec, b...)
+	}
+	return nil
+}
+
+func (d *Decoder) readN(n int) ([]byte, error) {
+	buf, err := readN(d.r, d.buf, n)
+	if err != nil {
+		return nil, err
+	}
+	d.buf = buf
+	if d.rec != nil {
+		d.rec = append(d.rec, buf...)
+	}
+	return buf, nil
+}
+
+func readN(r io.Reader, b []byte, n int) ([]byte, error) {
+	if n == 0 && b == nil {
+		return make([]byte, 0), nil
+	}
+
+	if cap(b) >= n {
+		b = b[:n]
+		_, err := io.ReadFull(r, b)
+		return b, err
+	}
+	b = b[:cap(b)]
+
+	pos := 0
+	for len(b) < n {
+		diff := n - len(b)
+		if diff > bytesAllocLimit {
+			diff = bytesAllocLimit
+		}
+		b = append(b, make([]byte, diff)...)
+
+		_, err := io.ReadFull(r, b[pos:])
+		if err != nil {
+			return nil, err
+		}
+
+		pos = len(b)
+	}
+
+	return b, nil
+}
+
+func min(a, b int) int {
+	if a <= b {
+		return a
+	}
+	return b
 }

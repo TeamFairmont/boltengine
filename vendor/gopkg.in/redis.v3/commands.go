@@ -4,6 +4,8 @@ import (
 	"io"
 	"strconv"
 	"time"
+
+	"gopkg.in/redis.v3/internal"
 )
 
 func formatInt(i int64) string {
@@ -31,7 +33,7 @@ func usePrecise(dur time.Duration) bool {
 
 func formatMs(dur time.Duration) string {
 	if dur > 0 && dur < time.Millisecond {
-		Logger.Printf(
+		internal.Logf(
 			"specified duration is %s, but minimal supported value is %s",
 			dur, time.Millisecond,
 		)
@@ -41,7 +43,7 @@ func formatMs(dur time.Duration) string {
 
 func formatSec(dur time.Duration) string {
 	if dur > 0 && dur < time.Second {
-		Logger.Printf(
+		internal.Logf(
 			"specified duration is %s, but minimal supported value is %s",
 			dur, time.Second,
 		)
@@ -694,6 +696,21 @@ func (c *commandable) HMSet(key, field, value string, pairs ...string) *StatusCm
 	return cmd
 }
 
+func (c *commandable) HMSetMap(key string, fields map[string]string) *StatusCmd {
+	args := make([]interface{}, 2+len(fields)*2)
+	args[0] = "HMSET"
+	args[1] = key
+	i := 2
+	for k, v := range fields {
+		args[i] = k
+		args[i+1] = v
+		i += 2
+	}
+	cmd := NewStatusCmd(args...)
+	c.Process(cmd)
+	return cmd
+}
+
 func (c *commandable) HSet(key, field, value string) *BoolCmd {
 	cmd := NewBoolCmd("HSET", key, field, value)
 	c.Process(cmd)
@@ -942,8 +959,16 @@ func (c *commandable) SMove(source, destination string, member interface{}) *Boo
 	return cmd
 }
 
+// Redis `SPOP key` command.
 func (c *commandable) SPop(key string) *StringCmd {
 	cmd := NewStringCmd("SPOP", key)
+	c.Process(cmd)
+	return cmd
+}
+
+// Redis `SPOP key count` command.
+func (c *commandable) SPopN(key string, count int64) *StringSliceCmd {
+	cmd := NewStringSliceCmd("SPOP", key, count)
 	c.Process(cmd)
 	return cmd
 }

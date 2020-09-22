@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/TeamFairmont/amqp"
 	"github.com/TeamFairmont/boltengine/bolterror"
 	"github.com/TeamFairmont/boltengine/commandprocess"
@@ -20,6 +19,7 @@ import (
 	"github.com/TeamFairmont/boltshared/mqwrapper"
 	"github.com/TeamFairmont/boltshared/validation"
 	"github.com/TeamFairmont/gabs"
+	"github.com/sirupsen/logrus"
 )
 
 // HandleCall preps and performs queing, validation, and initiates processing for an API call.

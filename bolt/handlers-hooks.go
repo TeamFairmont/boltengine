@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // serveSingle allows individual files to be served.  Useful for css, js, or html

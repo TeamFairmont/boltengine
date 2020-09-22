@@ -1,6 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 package bolt
 
@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/TeamFairmont/boltengine/bolterror"
 	"github.com/TeamFairmont/boltengine/commandprocess"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 func apicallHandlers(engine *Engine) {

@@ -3,22 +3,15 @@ package redis // import "gopkg.in/redis.v3"
 import (
 	"fmt"
 	"log"
-	"os"
-	"sync/atomic"
 
+	"gopkg.in/redis.v3/internal"
 	"gopkg.in/redis.v3/internal/pool"
 )
 
-// Deprecated. Use SetLogger instead.
 var Logger *log.Logger
 
-func init() {
-	SetLogger(log.New(os.Stderr, "redis: ", log.LstdFlags))
-}
-
 func SetLogger(logger *log.Logger) {
-	Logger = logger
-	pool.Logger = logger
+	internal.Logger = logger
 }
 
 type baseClient struct {
@@ -39,7 +32,7 @@ func (c *baseClient) conn() (*pool.Conn, error) {
 	}
 	if !cn.Inited {
 		if err := c.initConn(cn); err != nil {
-			_ = c.connPool.Replace(cn, err)
+			_ = c.connPool.Remove(cn, err)
 			return nil, err
 		}
 	}
@@ -48,7 +41,7 @@ func (c *baseClient) conn() (*pool.Conn, error) {
 
 func (c *baseClient) putConn(cn *pool.Conn, err error, allowTimeout bool) bool {
 	if isBadConn(err, allowTimeout) {
-		_ = c.connPool.Replace(cn, err)
+		_ = c.connPool.Remove(cn, err)
 		return false
 	}
 
@@ -104,7 +97,7 @@ func (c *baseClient) process(cmd Cmder) {
 		if err := writeCmd(cn, cmd); err != nil {
 			c.putConn(cn, err, false)
 			cmd.setErr(err)
-			if shouldRetry(err) {
+			if err != nil && shouldRetry(err) {
 				continue
 			}
 			return
@@ -112,7 +105,7 @@ func (c *baseClient) process(cmd Cmder) {
 
 		err = cmd.readReply(cn)
 		c.putConn(cn, err, readTimeout != nil)
-		if shouldRetry(err) {
+		if err != nil && shouldRetry(err) {
 			continue
 		}
 
@@ -170,12 +163,12 @@ func NewClient(opt *Options) *Client {
 func (c *Client) PoolStats() *PoolStats {
 	s := c.connPool.Stats()
 	return &PoolStats{
-		Requests: atomic.LoadUint32(&s.Requests),
-		Hits:     atomic.LoadUint32(&s.Hits),
-		Waits:    atomic.LoadUint32(&s.Waits),
-		Timeouts: atomic.LoadUint32(&s.Timeouts),
+		Requests: s.Requests,
+		Hits:     s.Hits,
+		Waits:    s.Waits,
+		Timeouts: s.Timeouts,
 
-		TotalConns: atomic.LoadUint32(&s.TotalConns),
-		FreeConns:  atomic.LoadUint32(&s.FreeConns),
+		TotalConns: s.TotalConns,
+		FreeConns:  s.FreeConns,
 	}
 }

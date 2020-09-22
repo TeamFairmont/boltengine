@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/TeamFairmont/boltengine/bolt"
 	"github.com/TeamFairmont/boltshared/config"
 	"github.com/TeamFairmont/boltshared/utils"
+	"github.com/sirupsen/logrus"
 )
 
 var (

@@ -13,11 +13,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/TeamFairmont/boltengine/bolterror"
 	"github.com/TeamFairmont/boltshared/mqwrapper"
 	"github.com/TeamFairmont/boltshared/utils"
 	"github.com/TeamFairmont/gabs"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -133,10 +133,10 @@ func coreHandleSaveConfig(ctx *Context, w http.ResponseWriter, r *http.Request, 
 				}, "Error obtaining username")
 			}
 			ctx.Engine.LogError("coreHandleSaveConfig", logrus.Fields{
-				"method":     r.Method,
-				"url":        r.URL.Path,
-				"remoteaddr": r.RemoteAddr,
-				"err":        err,
+				"method":               r.Method,
+				"url":                  r.URL.Path,
+				"remoteaddr":           r.RemoteAddr,
+				"err":                  err,
 				"currentUser.Username": currentUser.Username,
 				"customCfgpath":        ConfigPath,
 			}, "Error writing to config file.  Does the currentUser.Username have permission to edit customCfgpath?")
